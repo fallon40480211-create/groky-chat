@@ -1,6 +1,6 @@
 {
   "name": "groky-chat",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Kelivo-style AI chat PWA (static, client-only)",
   "scripts": {
@@ -8,7 +8,7 @@
     "fake-api": "node scripts/fake-sse-server.mjs",
     "icons": "node scripts/make-icons.mjs",
     "vendor": "cp node_modules/marked/lib/marked.umd.js public/vendor/marked.min.js && cp node_modules/dompurify/dist/purify.min.js public/vendor/ && cp node_modules/@highlightjs/cdn-assets/highlight.min.js public/vendor/ && cp node_modules/@highlightjs/cdn-assets/styles/github.min.css public/vendor/hl-light.css && cp node_modules/@highlightjs/cdn-assets/styles/github-dark-dimmed.min.css public/vendor/hl-dark.css",
-    "test": "node scripts/e2e.mjs",
+    "test": "node scripts/e2e.mjs && node scripts/sheet-keyboard.mjs && node scripts/ui-shots.mjs",
     "build": "rm -rf dist && cp -r public dist && echo 'dist/ ready'"
   },
   "devDependencies": {

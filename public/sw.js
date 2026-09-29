@@ -1,5 +1,5 @@
 /* groky chat service worker：只缓存本站静态外壳，绝不拦截跨域（API）请求 */
-const VERSION = 'groky-v1.0.0';
+const VERSION = 'groky-v1.1.0';
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'manifest.json',
   'vendor/marked.min.js', 'vendor/purify.min.js', 'vendor/highlight.min.js',

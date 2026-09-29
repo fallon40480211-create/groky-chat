@@ -5,14 +5,14 @@
 ## 目录
 - `public/` —— 可直接部署的静态站点（index.html / style.css / app.js / sw.js / manifest.json / icons/ / vendor/）
 - `dist/` —— `npm run build` 生成（public 的拷贝）
-- `scripts/make-icons.mjs` 生成图标；`scripts/fake-sse-server.mjs` 假 LLM 流式服务；`scripts/e2e.mjs` 端到端测试
+- `scripts/make-icons.mjs` 生成图标；`scripts/fake-sse-server.mjs` 假 LLM 流式服务；`scripts/e2e.mjs` 端到端测试（默认 WebKit，`BROWSER=chromium` 可切换）；`scripts/sheet-keyboard.mjs` iOS 键盘遮挡回归测试；`scripts/ui-shots.mjs` 界面截图
 - `screenshots/` 测试截图
 
 ## 本地运行
 ```bash
 npm run serve        # http://localhost:8787
 npm run fake-api     # 可选：假 SSE 服务 http://localhost:8788/v1（CORS 已开）
-npm test             # 需要以上两个服务在运行
+npm test             # 需要以上两个服务在运行；WebKit 需先 npx playwright install webkit（Linux 另需 install-deps）
 ```
 
 ## 部署（iPhone “添加到主屏幕”需 HTTPS）

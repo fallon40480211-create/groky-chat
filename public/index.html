@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>groky chat</title>
   <meta name="description" content="groky chat —— 纯本地的 AI 聊天客户端">
-  <meta name="theme-color" content="#faf6f1">
+  <meta name="theme-color" content="#fcfcfb">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,17 +24,19 @@
 </head>
 <body>
   <div id="app">
-    <aside id="sidebar" aria-label="对话列表">
-      <div class="side-head">
-        <div class="brand"><img src="icons/icon-192.png" alt=""><span>groky chat</span></div>
-        <button id="btn-new-side" class="icon-btn" aria-label="新对话" data-icon="plus"></button>
+    <aside id="sidebar" aria-label="助手与对话">
+      <div class="side-top">
+        <label class="side-search"><span data-icon="bot"></span><input id="conv-search" type="search" placeholder="搜索当前助手" autocomplete="off" aria-label="搜索对话"></label>
+        <button id="btn-scope" class="icon-btn" aria-label="显示全部助手的对话" aria-pressed="false" data-icon="history"></button>
       </div>
-      <div class="side-search"><input id="conv-search" type="search" placeholder="搜索对话" autocomplete="off"></div>
-      <nav id="conv-list"></nav>
-      <div class="side-foot">
-        <button class="side-link" data-open="providers"><span data-icon="plug"></span>模型服务</button>
-        <button class="side-link" data-open="personas"><span data-icon="mask"></span>角色 / 人设</button>
-        <button class="side-link" data-open="settings"><span data-icon="gear"></span>设置</button>
+      <div id="side-scroll">
+        <section id="assistants" aria-label="助手"></section>
+        <nav id="conv-list" aria-label="对话列表"></nav>
+      </div>
+      <div class="side-user">
+        <button id="btn-user" class="user-chip" aria-label="偏好设置"><span id="user-avatar" class="user-avatar"></span><span id="user-name"></span></button>
+        <button id="btn-new-side" class="icon-btn" aria-label="新对话" data-icon="chatplus"></button>
+        <button id="btn-settings" class="icon-btn" aria-label="设置" data-icon="gear"></button>
       </div>
     </aside>
     <div id="scrim"></div>
@@ -43,18 +45,35 @@
         <button id="btn-menu" class="icon-btn" aria-label="菜单" data-icon="menu"></button>
         <button id="btn-conv-settings" class="title-btn" aria-label="对话设置">
           <span id="conv-title">新对话</span>
-          <span id="conv-model" class="chip">未选择模型</span>
+          <span id="conv-model">未选择模型</span>
         </button>
-        <button id="btn-new" class="icon-btn" aria-label="新对话" data-icon="edit"></button>
+        <button id="btn-tune" class="icon-btn" aria-label="对话参数" data-icon="tune"></button>
+        <button id="btn-new" class="icon-btn" aria-label="新对话" data-icon="chatplus"></button>
       </header>
       <section id="messages" aria-live="polite"></section>
       <footer id="composer">
-        <div class="composer-box">
-          <textarea id="input" rows="1" placeholder="输入消息…" enterkeyhint="send"></textarea>
-          <button id="btn-send" class="send-btn" aria-label="发送" data-icon="send"></button>
+        <div class="composer-card">
+          <textarea id="input" rows="1" placeholder="输入消息与AI聊天" enterkeyhint="send" aria-label="消息"></textarea>
+          <div class="composer-tools">
+            <button id="tool-model" class="tool-btn accent" aria-label="选择模型" data-icon="spark"></button>
+            <button id="tool-persona" class="tool-btn" aria-label="选择助手"></button>
+            <button id="tool-think" class="tool-btn" aria-label="深度思考" data-icon="bulb"></button>
+            <button id="tool-ctx" class="tool-btn" aria-label="上下文条数" data-icon="layers"></button>
+            <span class="grow"></span>
+            <button id="tool-more" class="tool-btn" aria-label="更多操作" data-icon="plus"></button>
+            <button id="tool-mic" class="tool-btn" aria-label="语音输入" data-icon="mic"></button>
+            <button id="btn-send" class="send-btn" aria-label="发送" data-icon="send"></button>
+          </div>
         </div>
       </footer>
     </main>
+    <section id="settings-page" aria-label="设置" hidden>
+      <header class="page-head">
+        <button id="settings-back" class="icon-btn" aria-label="返回" data-icon="arrowleft"></button>
+        <h1>设置</h1>
+      </header>
+      <div id="settings-body" class="page-body"></div>
+    </section>
   </div>
   <div id="sheet-root"></div>
   <div id="toast" role="status"></div>

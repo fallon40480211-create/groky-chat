@@ -1,5 +1,5 @@
 // 端到端测试：iPhone 视口 390x844，配合 fake-sse-server（8788）与静态服务器（8787）
-import { chromium, devices } from 'playwright';
+import { chromium, webkit, devices } from 'playwright';
 import fs from 'node:fs';
 const APP = process.env.APP_URL || 'http://localhost:8787/';
 const FAKE = 'http://localhost:8788/v1';
@@ -7,8 +7,10 @@ const SHOTS = new URL('../screenshots/', import.meta.url).pathname;
 const results = [];
 const ok = (name, cond, extra = '') => { results.push([cond ? 'PASS' : 'FAIL', name, extra]); console.log(cond ? '✅' : '❌', name, extra); };
 
-const browser = await chromium.launch();
-const ctx = await browser.newContext({ ...devices['iPhone 13'], viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'zh-CN', colorScheme: 'light', acceptDownloads: true });
+const engine = process.env.BROWSER === 'chromium' ? chromium : webkit; // 默认 WebKit（贴近 iOS Safari）
+const browser = await engine.launch();
+const { defaultBrowserType, ...iphone } = devices['iPhone 13'];
+const ctx = await browser.newContext({ ...iphone, viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'zh-CN', colorScheme: 'light', acceptDownloads: true });
 const page = await ctx.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
@@ -83,9 +85,11 @@ await waitDone();
 ok('停止生成', (await lastAsst().innerText()).includes('已停止生成'));
 
 // ---- 推理模型（reasoning_content）
-await page.locator('#btn-conv-settings').click();
-await page.locator('.sheet select').first().selectOption({ label: 'fake-reasoner' });
-await sheetBtn('保存').click();
+// 通过输入栏的模型选择器切换到推理模型
+await page.locator('#tool-model').click();
+await page.locator('.sheet .choice', { hasText: 'fake-reasoner' }).click();
+await page.waitForTimeout(150);
+ok('输入栏切换模型', (await page.textContent('#conv-model')).includes('fake-reasoner'), await page.textContent('#conv-model'));
 await page.fill('#input', '思考题');
 await page.locator('#btn-send').click();
 await waitDone();
@@ -93,7 +97,8 @@ ok('思考过程显示', (await lastAsst().locator('details.reasoning').count())
 
 // ---- Anthropic 原生（新对话 + 切换模型 + 角色 + 温度）
 await page.locator('#btn-menu').click();
-await page.getByRole('button', { name: '模型服务' }).click();
+await page.locator('#btn-settings').click();
+await page.locator('.set-row', { hasText: '供应商' }).click();
 await page.locator('.preset-grid button', { hasText: 'Anthropic' }).click();
 const s2 = page.locator('.sheet').last();
 await s2.locator('input[type=url]').fill(FAKE);
@@ -102,6 +107,8 @@ await s2.getByPlaceholder('输入模型名，如 grok-4').fill('fake-claude');
 await s2.getByRole('button', { name: '添加', exact: true }).click();
 await sheetBtn('保存').click();
 await page.locator('.sheet').last().getByRole('button', { name: '关闭' }).click();
+ok('设置页供应商数量', (await page.locator('.set-row', { hasText: '供应商' }).innerText()).includes('2 个'));
+await page.locator('#settings-back').click(); await page.waitForTimeout(300);
 await page.locator('#btn-new').click();
 await page.locator('#btn-conv-settings').click();
 await page.locator('.sheet select').nth(0).selectOption({ label: 'fake-claude' });
@@ -109,7 +116,7 @@ await page.locator('.sheet select').nth(1).selectOption({ label: '💻 编程搭
 await page.locator('.sheet .switch').first().check();
 await sheetBtn('保存').click();
 await page.waitForTimeout(200);
-ok('顶部显示角色+模型', (await page.textContent('#conv-model')).includes('💻 fake-claude'), await page.textContent('#conv-model'));
+ok('顶部显示模型 + 输入栏显示助手', (await page.textContent('#conv-model')).includes('fake-claude') && (await page.textContent('#tool-persona')).includes('💻'), await page.textContent('#conv-model'));
 await page.fill('#input', '用 Claude 格式回复');
 await page.locator('#btn-send').click();
 await waitDone();
@@ -118,16 +125,18 @@ ok('Anthropic SSE 解析（含必要请求头）', at.includes('Anthropic 格式
 
 // ---- 新建角色
 await page.locator('#btn-menu').click();
-await page.getByRole('button', { name: '角色 / 人设' }).click();
-await page.getByRole('button', { name: '＋ 新建角色' }).click();
+await page.waitForTimeout(300);
+await page.locator('.asst-add').click();
 await page.getByPlaceholder('角色名称').fill('猫娘');
 await page.locator('.sheet').last().locator('textarea').fill('你是一只可爱的猫娘，句尾带“喵”。');
 await sheetBtn('保存').click();
-ok('新建角色', await page.evaluate(() => window.__groky.S.personas.some((p) => p.name === '猫娘')));
-await page.locator('.sheet').last().getByRole('button', { name: '关闭' }).click();
+ok('新建助手（抽屉）', await page.evaluate(() => window.__groky.S.personas.some((p) => p.name === '猫娘')) && (await page.locator('.asst-item', { hasText: '猫娘' }).count()) === 1);
+await page.locator('#scrim').click({ position: { x: 370, y: 400 } }); await page.waitForTimeout(300);
 
 // ---- 重命名（侧栏 ⋯）
 await page.locator('#btn-menu').click();
+await page.locator('#btn-scope').click();
+ok('历史按钮显示全部助手对话', (await page.locator('.conv-item').count()) === 2);
 await page.locator('.conv-item').first().locator('.ci-more').click();
 await sheetBtn('重命名').click();
 await page.locator('.sheet').last().locator('input').fill('Claude 测试对话');
@@ -136,17 +145,24 @@ await page.waitForTimeout(150);
 ok('重命名', (await page.locator('.conv-item').first().innerText()).includes('Claude 测试对话'));
 
 // ---- 深色主题 + 侧栏截图
-await page.locator('.side-link', { hasText: '设置' }).click();
+await page.locator('#btn-settings').click();
+await page.waitForTimeout(350);
+await page.screenshot({ path: SHOTS + '06-settings.png' });
+await page.locator('.set-row', { hasText: '颜色模式' }).click();
 await page.locator('.seg button', { hasText: '深色' }).click();
 ok('深色主题', (await page.getAttribute('html', 'data-theme')) === 'dark');
 
 // ---- 导出
+await page.locator('.sheet').last().getByRole('button', { name: '关闭' }).click();
+await page.screenshot({ path: SHOTS + '07-settings-dark.png' });
+await page.locator('.set-row', { hasText: '数据备份' }).click();
 const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: '导出 JSON' }).click()]);
 const exportPath = SHOTS + '../test-export.json';
 await dl.saveAs(exportPath);
 const exp = JSON.parse(fs.readFileSync(exportPath, 'utf8'));
 ok('导出 JSON', exp.app === 'groky-chat' && exp.conversations.length === 2 && exp.providers.length === 2, `${exp.conversations.length} 对话 / ${exp.providers.length} 服务`);
 await page.locator('.sheet').last().getByRole('button', { name: '关闭' }).click();
+await page.locator('#settings-back').click(); await page.waitForTimeout(300);
 await page.locator('#btn-menu').click();
 await page.waitForTimeout(350);
 await page.screenshot({ path: SHOTS + '04-sidebar-dark.png' });
@@ -161,11 +177,13 @@ ok('刷新后数据仍在 (IndexedDB)', await page.evaluate(() => window.__groky
 
 // ---- 删除对话 + 导入恢复
 await page.locator('#btn-menu').click();
+if ((await page.getAttribute('#btn-scope', 'aria-pressed')) !== 'true') await page.locator('#btn-scope').click();
 await page.locator('.conv-item').first().locator('.ci-more').click();
 await sheetBtn('删除对话').click();
 await page.waitForTimeout(200);
 ok('删除对话', await page.evaluate(() => window.__groky.S.convs.length === 1));
-await page.locator('.side-link', { hasText: '设置' }).click();
+await page.locator('#btn-settings').click();
+await page.locator('.set-row', { hasText: '数据备份' }).click();
 await page.locator('.sheet input[type=file]').setInputFiles(exportPath);
 await page.waitForFunction(() => window.__groky.S.convs.length === 2, null, { timeout: 5000 }).catch(() => {});
 ok('导入 JSON 恢复', await page.evaluate(() => window.__groky.S.convs.length === 2));
@@ -175,16 +193,30 @@ const swOk = await page.evaluate(async () => { const r = await navigator.service
 ok('Service Worker 已激活', swOk);
 await page.reload(); await page.waitForTimeout(500);
 await ctx.setOffline(true);
-await page.reload();
+let offlineErr = '';
+await page.reload().catch((e) => { offlineErr = e.message.split('\n')[0]; });
+if (offlineErr) await page.goto(APP).catch((e) => { offlineErr += ' / ' + e.message.split('\n')[0]; });
 await page.waitForSelector('#topbar', { timeout: 5000 }).catch(() => {});
-ok('离线可打开应用外壳', (await page.locator('#topbar').count()) === 1 && await page.evaluate(() => !!window.marked));
+const offlineOk = (await page.locator('#topbar').count()) === 1 && await page.evaluate(() => !!window.marked).catch(() => false);
 await ctx.setOffline(false);
+if ((offlineOk && !offlineErr) || engine !== webkit) ok('离线可打开应用外壳', offlineOk, offlineErr);
+else {
+  // Playwright 的 WebKit 在离线模式下 reload 会报内部错误（已知限制），改用 Chromium 验证 SW 离线外壳
+  const cb = await chromium.launch(); const cctx = await cb.newContext(); const cp = await cctx.newPage();
+  await cp.goto(APP); await cp.evaluate(() => navigator.serviceWorker.ready); await cp.reload(); await cp.waitForTimeout(500);
+  await cctx.setOffline(true); await cp.reload();
+  await cp.waitForSelector('#topbar', { timeout: 5000 }).catch(() => {});
+  ok('离线可打开应用外壳（WebKit 离线 reload 不受支持，改用 Chromium 验证）', (await cp.locator('#topbar').count()) === 1 && await cp.evaluate(() => !!window.marked), offlineErr);
+  await cb.close();
+  await page.goto(APP); await page.waitForSelector('#topbar');
+}
 
 // ---- 网络错误提示（CORS/不可达）
 await page.evaluate(async () => {
   const S = window.__groky.S;
   S.providers[0].baseUrl = 'http://localhost:9/v1';
 });
+await page.locator('#settings-back').click({ timeout: 2000 }).catch(() => {}); await page.waitForTimeout(300);
 await page.locator('#btn-new').click();
 await page.locator('#btn-conv-settings').click();
 await page.locator('.sheet select').first().selectOption({ label: 'fake-gpt' });
@@ -194,7 +226,7 @@ await page.locator('#btn-send').click();
 await waitDone();
 ok('网络错误友好提示', (await lastAsst().locator('.msg-error').innerText()).includes('CORS'));
 
-ok('无 JS 运行错误', errors.filter((e) => !/ERR_CONNECTION_REFUSED|Failed to load resource|ERR_INTERNET_DISCONNECTED/.test(e)).length === 0, errors.join(' | ').slice(0, 300));
+ok('无 JS 运行错误', errors.filter((e) => !/ERR_CONNECTION_REFUSED|Failed to load resource|ERR_INTERNET_DISCONNECTED|restricted network port|WebKit encountered an internal error/.test(e)).length === 0, errors.join(' | ').slice(0, 300));
 await browser.close();
 const failed = results.filter((r) => r[0] === 'FAIL').length;
 console.log(`\n${results.length - failed}/${results.length} 通过`);

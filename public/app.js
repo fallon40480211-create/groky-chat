@@ -1,27 +1,53 @@
 /* groky chat —— 纯前端 AI 聊天客户端。所有数据（含 API Key）只保存在本机 IndexedDB。 */
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 
 /* ================= 小工具 ================= */
 const $ = (s, r = document) => r.querySelector(s);
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
+const L = (d, sw = 1.7) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ICONS = {
-  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>',
-  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
-  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
-  send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
-  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>',
-  plug: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6M15 2v6M6 8h12v3a6 6 0 0 1-12 0Z"/><path d="M12 17v5"/></svg>',
-  mask: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
-  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>',
-  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-  redo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>',
-  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
-  more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>',
-  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
-  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
-  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>',
+  menu: L('<path d="M4 8h14M4 15h9"/>', 2),
+  plus: L('<path d="M12 5v14M5 12h14"/>'),
+  edit: L('<path d="M16.9 3.6a2 2 0 0 1 2.9 2.9L8 18.3 4 19.5l1.2-4Z"/><path d="m14.5 6 3.5 3.5"/>'),
+  pencil: L('<path d="M16.9 3.6a2 2 0 0 1 2.9 2.9L8 18.3 4 19.5l1.2-4Z"/><path d="m14.5 6 3.5 3.5"/>', 1.5),
+  send: L('<path d="M12 19V5M6 11l6-6 6 6"/>', 2.1),
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>',
+  chatplus: L('<path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.3A8.5 8.5 0 1 1 21 12Z"/><path d="M12 8.5v7M8.5 12h7"/>'),
+  tune: L('<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>'),
+  spark: L('<path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/>', 1.9),
+  bulb: L('<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3Z"/>'),
+  layers: L('<path d="m12 3 9 5-9 5-9-5Z"/><path d="m3 13 9 5 9-5"/>'),
+  mic: L('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>'),
+  bot: L('<rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M2 13v2M22 13v2"/>'),
+  history: L('<path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5M12 7.5V12l3 2"/>'),
+  chevdown: L('<path d="m6 9 6 6 6-6"/>'),
+  chevup: L('<path d="m6 15 6-6 6 6"/>'),
+  chevright: L('<path d="m9 6 6 6-6 6"/>', 1.8),
+  arrowleft: L('<path d="M19 12H5M11 6l-6 6 6 6"/>', 1.9),
+  gear: L('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>'),
+  palette: L('<path d="M12 3v2M5.6 5.6 7 7M3 12h2M12 8a4 4 0 0 0 0 8"/><path d="M12 8a4 4 0 0 1 4 4 4 4 0 0 1-4 4"/><path d="M18.4 5.6 17 7M21 12h-2M17 17l1.4 1.4M12 19v2" stroke-dasharray="1 2.4"/>'),
+  monitor: L('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>'),
+  heart: L('<path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1L12 21.5l8.8-8.8a5 5 0 0 0 0-7.1Z"/>'),
+  boxes: L('<path d="m12 3 4 2.2v4.6L12 12 8 9.8V5.2Z"/><path d="m8 12 4 2.2v4.6L8 21l-4-2.2v-4.6Z"/><path d="m16 12 4 2.2v4.6L16 21l-4-2.2"/>'),
+  globe: L('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'),
+  terminal: L('<path d="m4 7 5 5-5 5M12 19h8"/>'),
+  brain: L('<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a2 2 0 0 0-3-1Z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/>'),
+  zap: L('<path d="M13 2 4 14h7l-1 8 9-12h-7Z"/>'),
+  database: L('<ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'),
+  drive: L('<path d="M22 13H2M5.5 5.5 2 13v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5l-3.5-7.5A2 2 0 0 0 16.7 4H7.3a2 2 0 0 0-1.8 1.5Z"/><path d="M6 17h.01M10 17h.01"/>'),
+  info: L('<circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/>'),
+  chart: L('<path d="M4 4v16h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/>'),
+  book: L('<path d="M3 5a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v16a2 2 0 0 0-2-2H3ZM21 5a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v16a2 2 0 0 1 2-2h7Z"/>'),
+  pin: L('<path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3Z"/>'),
+  copy: L('<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
+  redo: L('<path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/>'),
+  trash: L('<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>'),
+  more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
+  close: L('<path d="M6 6l12 12M18 6 6 18"/>', 1.9),
+  back: L('<path d="M19 12H5M11 6l-6 6 6 6"/>', 1.9),
+  check: L('<path d="M5 12l5 5L20 7"/>', 2.2),
 };
 function icon(name) { const s = document.createElement('span'); s.dataset.icon = name; s.innerHTML = ICONS[name] || ''; return s; }
 function fillIcons(root = document) { root.querySelectorAll('[data-icon]').forEach((el) => { if (!el.firstChild) el.innerHTML = ICONS[el.dataset.icon] || ''; }); }
@@ -100,10 +126,10 @@ const idb = {
 };
 
 /* ================= 状态 ================= */
-const DEFAULT_SETTINGS = { theme: 'auto', enterSend: false, defaultModel: null, defaultPersonaId: null, maxContext: 0 };
+const DEFAULT_SETTINGS = { theme: 'auto', enterSend: false, defaultModel: null, defaultPersonaId: null, maxContext: 0, userName: '', currentAssistantId: null, asstOpen: true };
 const S = {
   providers: [], personas: [], convs: [], settings: { ...DEFAULT_SETTINGS },
-  currentId: null, streaming: null, search: '', editingMsgId: null,
+  currentId: null, streaming: null, search: '', editingMsgId: null, scopeAll: false,
 };
 const saveSettings = () => idb.put('kv', S.settings, 'settings');
 const saveProvider = (p) => idb.put('providers', p);
@@ -211,7 +237,8 @@ function normalizeHistory(msgs) {
 /**
  * 统一的流式聊天调用。onDelta({text?, reasoning?})
  */
-async function streamChat({ provider, model, system, messages, temperature, signal, onDelta }) {
+const THINK_BUDGET = { low: 1024, medium: 4096, high: 12000 };
+async function streamChat({ provider, model, system, messages, temperature, think, signal, onDelta }) {
   const base = apiBase(provider);
   if (!base) throw new Error('该服务未配置 Base URL');
   const history = normalizeHistory(messages);
@@ -220,6 +247,11 @@ async function streamChat({ provider, model, system, messages, temperature, sign
     const body = { model, max_tokens: Number(provider.maxTokens) || 4096, messages: history, stream: true };
     if (system) body.system = system;
     if (temperature != null) body.temperature = Math.min(1, Math.max(0, temperature));
+    if (think && THINK_BUDGET[think]) { // 扩展思考：需 max_tokens > budget，且不能自定义温度
+      body.thinking = { type: 'enabled', budget_tokens: THINK_BUDGET[think] };
+      body.max_tokens = Math.max(body.max_tokens, THINK_BUDGET[think] + 2048);
+      delete body.temperature;
+    }
     const res = await fetch(base + '/messages', {
       method: 'POST', signal,
       headers: { 'content-type': 'application/json', ...authHeaders(provider) },
@@ -246,6 +278,7 @@ async function streamChat({ provider, model, system, messages, temperature, sign
   msgs.push(...history);
   const body = { model, messages: msgs, stream: true };
   if (temperature != null) body.temperature = temperature;
+  if (think) body.reasoning_effort = think; // OpenAI 兼容推理强度（仅推理模型支持）
   const res = await fetch(base + '/chat/completions', {
     method: 'POST', signal,
     headers: { 'Content-Type': 'application/json', ...authHeaders(provider) },
@@ -328,7 +361,7 @@ function applyTheme() {
   document.documentElement.dataset.theme = t;
   $('#hl-light').disabled = t === 'dark';
   $('#hl-dark').disabled = t !== 'dark';
-  const color = t === 'dark' ? '#1f1b18' : '#faf6f1';
+  const color = t === 'dark' ? '#151515' : '#fcfcfb';
   document.querySelectorAll('meta[name=theme-color]').forEach((m) => m.setAttribute('content', color));
 }
 mqDark.addEventListener?.('change', applyTheme);
@@ -353,35 +386,101 @@ function enhanceMd(el) {
 }
 
 /* ================= 渲染：侧边栏 ================= */
+const pad2 = (n) => String(n).padStart(2, '0');
+function currentAssistant() {
+  const id = S.settings.currentAssistantId ?? S.settings.defaultPersonaId;
+  return S.personas.find((p) => p.id === id) || S.personas[0] || null;
+}
+function avatarEl(p, cls = 'asst-avatar') {
+  const e = (p?.emoji || '').trim();
+  return h('span', { class: cls }, e || (p?.name || '?').slice(0, 1).toLowerCase());
+}
+function dayLabel(ts) {
+  const d = new Date(ts); d.setHours(0, 0, 0, 0);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const diff = Math.round((today - d) / 864e5);
+  if (diff === 0) return '今天';
+  if (diff === 1) return '昨天';
+  if (d.getFullYear() === today.getFullYear()) return `${d.getMonth() + 1}月${d.getDate()}日`;
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
+function renderAssistants() {
+  const box = $('#assistants'); if (!box) return;
+  box.innerHTML = '';
+  const cur = currentAssistant();
+  const open = S.settings.asstOpen !== false;
+  box.append(h('button', {
+    class: 'asst-current', 'aria-expanded': String(open), 'aria-label': `当前助手：${cur?.name || '无'}，${open ? '收起' : '展开'}助手列表`,
+    onclick: async () => { S.settings.asstOpen = !open; await saveSettings(); renderAssistants(); },
+  }, avatarEl(cur), h('span', { class: 'asst-name' }, cur ? `${cur.name}` : '未选择助手'), icon(open ? 'chevup' : 'chevdown')));
+  if (!open) return;
+  const list = h('div', { class: 'asst-list' });
+  for (const p of S.personas) {
+    const row = h('div', { class: 'asst-item' + (p.id === cur?.id ? ' active' : ''), role: 'button', tabindex: 0, 'data-id': p.id },
+      avatarEl(p), h('span', { class: 'asst-name' }, p.name),
+      h('button', { class: 'asst-edit', 'aria-label': `编辑助手 ${p.name}`, onclick: (e) => { e.stopPropagation(); editPersona(p, renderSide); } }, icon('pencil')));
+    row.addEventListener('click', () => selectAssistant(p));
+    list.append(row);
+  }
+  list.append(h('button', { class: 'asst-item asst-add', onclick: () => editPersona({ id: null, name: '', emoji: '🙂', prompt: '', temperature: null }, renderSide) },
+    h('span', { class: 'asst-avatar' }, icon('plus')), h('span', { class: 'asst-name' }, '新建助手')));
+  box.append(list);
+}
+
+async function selectAssistant(p) {
+  S.settings.currentAssistantId = p.id; await saveSettings();
+  const cur = currentConv();
+  if (cur && !cur.messages.length) { cur.personaId = p.id; await saveConv(cur); }
+  else if (cur && cur.personaId !== p.id) {
+    const recent = [...S.convs].filter((c) => c.personaId === p.id).sort((a, b) => b.updatedAt - a.updatedAt)[0];
+    S.currentId = recent?.id || null; localStorage.setItem('groky.current', S.currentId || '');
+  }
+  renderAll();
+}
+
 function renderConvList() {
   const list = $('#conv-list'); list.innerHTML = '';
   const q = S.search.trim().toLowerCase();
-  const convs = [...S.convs].sort((a, b) => b.updatedAt - a.updatedAt)
-    .filter((c) => !q || c.title.toLowerCase().includes(q) || c.messages.some((m) => m.content.toLowerCase().includes(q)));
-  if (!convs.length) { list.append(h('div', { class: 'conv-empty' }, q ? '没有匹配的对话' : '还没有对话，点右上角开始吧')); return; }
-  const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
-  const groups = [['今天', startToday.getTime()], ['最近 7 天', startToday.getTime() - 6 * 864e5], ['更早', -Infinity]];
-  let gi = -1;
+  const asst = currentAssistant();
+  const btn = $('#btn-scope');
+  if (btn) { btn.classList.toggle('on', S.scopeAll); btn.setAttribute('aria-pressed', String(S.scopeAll)); btn.setAttribute('aria-label', S.scopeAll ? '仅显示当前助手的对话' : '显示全部助手的对话'); }
+  $('#conv-search').placeholder = S.scopeAll ? '搜索全部对话' : '搜索当前助手';
+  const convs = [...S.convs]
+    .filter((c) => c.messages.length) // 未发送消息的空对话不进列表
+    .filter((c) => S.scopeAll || !asst || (c.personaId || null) === asst.id || c.id === S.currentId)
+    .filter((c) => !q || (c.title || '').toLowerCase().includes(q) || c.messages.some((m) => (m.content || '').toLowerCase().includes(q)))
+    .sort((a, b) => (!!b.pinned - !!a.pinned) || b.updatedAt - a.updatedAt);
+  if (!convs.length) {
+    list.append(h('div', { class: 'conv-empty' }, q ? '没有匹配的对话' : (S.scopeAll ? '还没有对话' : '该助手还没有对话')));
+    return;
+  }
+  let last = null;
   for (const c of convs) {
-    let g = groups.findIndex(([, t]) => c.updatedAt >= t);
-    if (g !== gi) { gi = g; list.append(h('div', { class: 'conv-group' }, groups[g][0])); }
-    const t = resolveTarget(c);
+    const g = c.pinned ? '置顶' : dayLabel(c.updatedAt);
+    if (g !== last) { last = g; list.append(h('div', { class: 'conv-group' }, g)); }
     const item = h('div', { class: 'conv-item' + (c.id === S.currentId ? ' active' : ''), role: 'button', tabindex: 0, 'data-id': c.id },
-      h('div', { class: 'ci-main' },
-        h('div', { class: 'ci-title' }, c.title || '新对话'),
-        h('div', { class: 'ci-sub' }, `${fmtTime(c.updatedAt)} · ${t ? t.model : '未选模型'}`)),
+      h('div', { class: 'ci-main' }, h('div', { class: 'ci-title' }, c.title || '新对话')),
       h('button', { class: 'ci-more', 'aria-label': '更多', onclick: (e) => { e.stopPropagation(); convActions(c); } }, icon('more')));
     item.addEventListener('click', () => { selectConv(c.id); closeSidebar(); });
     list.append(item);
   }
 }
 
+function renderUser() {
+  const n = (S.settings.userName || '').trim() || '我';
+  $('#user-name').textContent = n;
+  $('#user-avatar').textContent = [...n][0].toUpperCase();
+}
+function renderSide() { renderAssistants(); renderConvList(); renderUser(); }
+
 function convActions(c) {
   const sh = openSheet({
     title: c.title || '对话',
     body: h('div', { class: 'action-list' },
+      h('button', { onclick: async () => { sh.close(); c.pinned = !c.pinned; await saveConv(c); renderConvList(); toast(c.pinned ? '已置顶' : '已取消置顶'); } }, c.pinned ? '取消置顶' : '置顶'),
       h('button', { onclick: async () => { sh.close(); const t = await askText('重命名对话', c.title); if (t != null) { c.title = t.trim() || '新对话'; await saveConv(c); renderAll(); } } }, '重命名'),
-      h('button', { onclick: () => { sh.close(); selectConv(c.id); closeSidebar(); openConvSettings(); } }, '对话设置（模型 / 角色 / 温度）'),
+      h('button', { onclick: () => { sh.close(); selectConv(c.id); closeSidebar(); openConvSettings(); } }, '对话设置（模型 / 助手 / 温度）'),
       h('button', { class: 'danger', onclick: async () => { sh.close(); await deleteConv(c); } }, '删除对话')),
   });
 }
@@ -401,8 +500,7 @@ function renderHeader() {
   const c = currentConv();
   $('#conv-title').textContent = c?.title || '新对话';
   const t = resolveTarget(c);
-  const p = personaOf(c) || (!c ? S.personas.find((x) => x.id === S.settings.defaultPersonaId) : null);
-  $('#conv-model').textContent = t ? `${p ? p.emoji + ' ' : ''}${t.model}` : '未选择模型';
+  $('#conv-model').textContent = t ? `${t.model}${t.provider?.name ? ` (${t.provider.name})` : ''}` : '未选择模型';
 }
 
 function renderMessages() {
@@ -417,15 +515,11 @@ function renderMessages() {
 }
 
 function emptyState() {
-  const noProvider = !S.providers.length;
-  const tips = ['帮我写一段自我介绍', '用通俗的话解释什么是量子纠缠', '写一个 Python 快速排序并讲解', '周末北京一日游怎么安排？'];
+  if (S.providers.length) return h('div', { class: 'empty blank' });
   return h('div', { class: 'empty' },
-    h('img', { src: 'icons/icon-192.png', alt: '' }),
-    h('h2', {}, noProvider ? '欢迎使用 groky chat' : '有什么可以帮你？'),
-    h('p', {}, noProvider ? '先添加一个模型服务（API Key 只保存在本机）' : '选择下面的话题，或直接输入'),
-    noProvider
-      ? h('button', { class: 'btn primary', onclick: () => openProviders() }, '＋ 添加模型服务')
-      : h('div', { class: 'suggestions' }, tips.map((t) => h('button', { onclick: () => { $('#input').value = t; autoGrow(); $('#input').focus(); } }, t))));
+    h('h2', {}, '欢迎使用 groky chat'),
+    h('p', {}, '先添加一个模型服务（API Key 只保存在本机）'),
+    h('button', { class: 'btn primary', onclick: () => openProviders() }, '＋ 添加模型服务'));
 }
 
 function msgEl(c, m, idx) {
@@ -495,9 +589,21 @@ function updateComposer() {
   btn.innerHTML = ICONS[streamingHere ? 'stop' : 'send'];
   btn.setAttribute('aria-label', streamingHere ? '停止' : '发送');
   btn.disabled = !streamingHere && (!!S.streaming || !$('#input').value.trim());
+  btn.classList.toggle('ready', !btn.disabled && !streamingHere);
+  const c = currentConv();
+  const p = c ? personaOf(c) : currentAssistant();
+  const pb = $('#tool-persona');
+  pb.innerHTML = ''; pb.append(avatarEl(p, 'tool-avatar'));
+  pb.setAttribute('aria-label', `选择助手（当前：${p?.name || '无'}）`);
+  const think = c?.think || null;
+  $('#tool-think').classList.toggle('on', !!think);
+  $('#tool-think').setAttribute('aria-label', `深度思考（${think ? THINK_LABEL[think] : '关闭'}）`);
+  const ctxN = c?.maxContext ?? null;
+  $('#tool-ctx').classList.toggle('on', ctxN != null);
+  $('#tool-mic').classList.toggle('on', !!recog);
 }
 
-function renderAll() { renderConvList(); renderHeader(); renderMessages(); updateComposer(); }
+function renderAll() { renderSide(); renderHeader(); renderMessages(); updateComposer(); if (!$('#settings-page').hidden) renderSettingsPage(); }
 
 /* ================= 对话操作 ================= */
 function newConvObject() {
@@ -505,7 +611,7 @@ function newConvObject() {
   return {
     id: uid(), title: '新对话', createdAt: now, updatedAt: now,
     target: S.settings.defaultModel ? { ...S.settings.defaultModel } : null,
-    personaId: S.settings.defaultPersonaId || null,
+    personaId: S.settings.currentAssistantId ?? S.settings.defaultPersonaId ?? null,
     systemPrompt: '', temperature: null, messages: [],
   };
 }
@@ -521,6 +627,8 @@ async function newConv({ persist = true } = {}) {
 }
 function selectConv(id) {
   S.currentId = id; S.editingMsgId = null;
+  const c = currentConv();
+  if (c?.personaId && S.personas.some((p) => p.id === c.personaId)) { S.settings.currentAssistantId = c.personaId; saveSettings(); }
   localStorage.setItem('groky.current', id);
   renderAll();
 }
@@ -544,7 +652,7 @@ async function generate(c) {
   if (!c.target) c.target = { providerId: t.provider.id, model: t.model };
   const asst = { id: uid(), role: 'assistant', content: '', reasoning: '', model: t.model, providerId: t.provider.id, createdAt: Date.now(), pending: true };
   const history = c.messages.filter((m) => !m.error || m.content).map((m) => ({ role: m.role, content: m.content }));
-  const limit = Number(S.settings.maxContext) || 0;
+  const limit = Number(c.maxContext ?? S.settings.maxContext) || 0;
   const ctx = limit > 0 ? history.slice(-limit) : history;
   c.messages.push(asst); c.updatedAt = Date.now();
   await saveConv(c);
@@ -554,7 +662,7 @@ async function generate(c) {
   try {
     await streamChat({
       provider: t.provider, model: t.model, system: systemPromptOf(c), messages: ctx,
-      temperature: temperatureOf(c), signal: controller.signal,
+      temperature: temperatureOf(c), think: c.think || null, signal: controller.signal,
       onDelta: (d) => {
         if (d.text) asst.content += d.text;
         if (d.reasoning) asst.reasoning += d.reasoning;
@@ -602,6 +710,21 @@ async function deleteMsg(c, m) {
 }
 
 /* ================= 面板（Sheet） ================= */
+function isEditable(el) {
+  if (!el || !el.tagName) return false;
+  if (el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable) return true;
+  return el.tagName === 'INPUT' && !/^(checkbox|radio|range|file|button|submit)$/i.test(el.type);
+}
+let revealTimers = new Set();
+function revealFocused(delay = 300) {
+  const t = setTimeout(() => {
+    revealTimers.delete(t);
+    const el = document.activeElement;
+    if (!isEditable(el) || !el.closest('.sheet')) return;
+    try { el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: delay ? 'smooth' : 'auto' }); } catch { el.scrollIntoView(); }
+  }, delay);
+  revealTimers.add(t);
+}
 function openSheet({ title, body, footer, back = false, onClose }) {
   const root = $('#sheet-root');
   const backdrop = h('div', { class: 'sheet-backdrop' });
@@ -689,7 +812,7 @@ function openConvSettings() {
       field('标题', title),
       field('模型', msel, S.providers.length ? '每个对话可以单独选择模型' : null),
       !S.providers.length ? h('button', { class: 'btn', style: { width: '100%' }, onclick: () => { sh.close(); openProviders(); } }, '＋ 添加模型服务') : null,
-      field('角色 / 人设', psel),
+      field('助手', psel),
       field('系统提示（仅本对话，覆盖角色）', sys),
       h('div', { class: 'field' }, h('label', {}, '温度 Temperature'), temp.el),
       !isDraft ? h('button', { class: 'btn danger', style: { width: '100%', marginTop: '8px' }, onclick: async () => { sh.close(); await deleteConv(c); } }, '删除此对话') : null,
@@ -728,7 +851,7 @@ function openProviders() {
     body.append(h('p', { class: 'muted' }, '🔒 API Key 只保存在本设备浏览器的 IndexedDB 中，仅在请求时直接发送给对应服务商。'));
   };
   render();
-  openSheet({ title: '模型服务', body });
+  openSheet({ title: '供应商', body });
 }
 
 function editProvider(p, onDone) {
@@ -836,7 +959,7 @@ function openPersonas() {
       h('span', { class: 'li-main' }, h('div', { class: 'li-title' }, p.name), h('div', { class: 'li-sub' }, p.prompt || '（无系统提示）')),
       S.settings.defaultPersonaId === p.id ? h('span', { class: 'li-badge' }, '默认') : null))));
     if (!S.personas.length) body.append(h('p', { class: 'muted' }, '还没有角色'));
-    body.append(h('button', { class: 'btn primary', style: { width: '100%', marginTop: '10px' }, onclick: () => editPersona({ id: null, name: '', emoji: '🙂', prompt: '', temperature: null }, render) }, '＋ 新建角色'));
+    body.append(h('button', { class: 'btn primary', style: { width: '100%', marginTop: '10px' }, onclick: () => editPersona({ id: null, name: '', emoji: '🙂', prompt: '', temperature: null }, render) }, '＋ 新建助手'));
     const c = currentConv();
     if (c) {
       body.append(h('div', { class: 'section-title' }, '当前对话使用'));
@@ -846,7 +969,7 @@ function openPersonas() {
     }
   };
   render();
-  openSheet({ title: '角色 / 人设', body });
+  openSheet({ title: '助手', body });
 }
 
 function editPersona(p, onDone) {
@@ -857,7 +980,7 @@ function editPersona(p, onDone) {
   const temp = temperatureControl(p.temperature);
   const isDefault = h('input', { type: 'checkbox', class: 'switch' }); isDefault.checked = !isNew && S.settings.defaultPersonaId === p.id;
   const sh = openSheet({
-    title: isNew ? '新建角色' : '编辑角色', back: true,
+    title: isNew ? '新建助手' : '编辑助手', back: true,
     body: [
       h('div', { class: 'field' }, h('label', {}, '图标与名称'), h('div', { class: 'input-row' }, emoji, name)),
       field('系统提示 System Prompt', prompt),
@@ -886,40 +1009,202 @@ function editPersona(p, onDone) {
   });
 }
 
-/* ---------- 设置 / 导入导出 ---------- */
-function openSettings() {
+/* ---------- 输入栏工具 ---------- */
+const THINK_LABEL = { low: '轻度', medium: '中度', high: '深度' };
+async function ensureConv() {
+  let c = currentConv();
+  if (!c) {
+    c = newConvObject(); S.convs.push(c); S.currentId = c.id;
+    localStorage.setItem('groky.current', c.id); await saveConv(c);
+  }
+  return c;
+}
+function choiceSheet(title, items, { footer, note } = {}) {
+  // items: [{ label, sub, selected, icon, onPick, disabled }]
+  const sh = openSheet({
+    title,
+    body: [h('div', { class: 'choice-list' }, items.map((it) => h('button', {
+      class: 'choice' + (it.selected ? ' on' : ''), disabled: !!it.disabled, 'aria-pressed': String(!!it.selected),
+      onclick: async () => { sh.close(); await it.onPick?.(); },
+    }, it.icon || null, h('span', { class: 'ch-main' }, h('span', { class: 'ch-title' }, it.label), it.sub ? h('span', { class: 'ch-sub' }, it.sub) : null),
+    it.selected ? icon('check') : null))), note ? h('p', { class: 'muted' }, note) : null, footer || null],
+  });
+  return sh;
+}
+function openModelPicker() {
+  if (!S.providers.length) { toast('请先添加模型服务'); openProviders(); return; }
+  const c = currentConv(); const t = resolveTarget(c);
+  const items = [];
+  for (const p of S.providers) for (const m of p.models || []) {
+    items.push({ label: m, sub: p.name, selected: t && t.provider.id === p.id && t.model === m,
+      onPick: async () => { const cc = await ensureConv(); cc.target = { providerId: p.id, model: m }; await saveConv(cc); renderAll(); } });
+  }
+  choiceSheet('选择模型', items, { footer: h('button', { class: 'btn', style: { width: '100%', marginTop: '12px' }, onclick: () => { document.querySelectorAll('.sheet, .sheet-backdrop').forEach((e) => e.remove()); openProviders(); } }, '管理供应商') });
+}
+function openPersonaPicker() {
+  const c = currentConv(); const cur = c ? personaOf(c) : currentAssistant();
+  choiceSheet('选择助手', [
+    ...S.personas.map((p) => ({ label: p.name, sub: (p.prompt || '').slice(0, 40) || '（无系统提示）', icon: avatarEl(p), selected: cur?.id === p.id,
+      onPick: async () => {
+        S.settings.currentAssistantId = p.id; await saveSettings();
+        if (c) { c.personaId = p.id; await saveConv(c); }
+        renderAll(); toast(`已切换到 ${p.name}`);
+      } })),
+  ], { footer: h('button', { class: 'btn', style: { width: '100%', marginTop: '12px' }, onclick: () => { document.querySelectorAll('.sheet, .sheet-backdrop').forEach((e) => e.remove()); openPersonas(); } }, '管理助手') });
+}
+function openThinkPicker() {
+  const c = currentConv(); const v = c?.think || null;
+  choiceSheet('深度思考', [[null, '关闭', '使用模型默认行为'], ['low', '轻度', '更快'], ['medium', '中度', '平衡'], ['high', '深度', '更充分的推理']].map(([k, l, sub]) => ({
+    label: l, sub, selected: v === k, onPick: async () => { const cc = await ensureConv(); cc.think = k; await saveConv(cc); updateComposer(); toast(k ? `深度思考：${l}` : '已关闭深度思考'); },
+  })), { note: '开启后：OpenAI 兼容接口发送 reasoning_effort；Anthropic 发送 thinking（预算 1k / 4k / 12k tokens，并忽略自定义温度）。仅推理模型支持，不支持的模型可能报错。' });
+}
+function openCtxPicker() {
+  const c = currentConv(); const v = c?.maxContext ?? null;
+  const g = Number(S.settings.maxContext) || 0;
+  choiceSheet('上下文消息数', [[null, `跟随全局（${g ? '最近 ' + g + ' 条' : '全部历史'}）`], [0, '全部历史'], [6, '最近 6 条'], [10, '最近 10 条'], [20, '最近 20 条'], [40, '最近 40 条']].map(([k, l]) => ({
+    label: l, selected: v === k, onPick: async () => { const cc = await ensureConv(); cc.maxContext = k; await saveConv(cc); updateComposer(); },
+  })), { note: '仅对当前对话生效，控制每次发送给模型的历史消息条数。' });
+}
+function convToMarkdown(c) {
+  return `# ${c.title}\n\n` + c.messages.map((m) => `**${m.role === 'user' ? ((S.settings.userName || '').trim() || '我') : (m.model || 'assistant')}**：\n\n${m.content}`).join('\n\n---\n\n');
+}
+function openMoreMenu() {
+  const c = currentConv();
+  const sh = openSheet({
+    title: '更多',
+    body: h('div', { class: 'action-list' },
+      h('button', { onclick: () => { sh.close(); newConv(); } }, '新对话'),
+      h('button', { onclick: () => { sh.close(); openConvSettings(); } }, '对话设置（标题 / 系统提示 / 温度）'),
+      h('button', { disabled: !c?.messages.length, onclick: () => { sh.close(); copyText(convToMarkdown(c)); } }, '复制整段对话（Markdown）'),
+      h('button', { class: 'soon', disabled: true }, '图片 / 文件附件', h('small', {}, '即将推出'))),
+  });
+}
+let recog = null;
+function toggleMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('当前浏览器不支持语音输入，可使用键盘自带的听写'); return; }
+  if (recog) { recog.stop(); return; }
+  const input = $('#input'); const base = input.value;
+  recog = new SR(); recog.lang = 'zh-CN'; recog.interimResults = true; recog.continuous = false;
+  recog.onresult = (e) => { let t = ''; for (const r of e.results) t += r[0].transcript; input.value = base + t; autoGrow(); };
+  recog.onerror = (e) => toast('语音识别出错：' + (e.error || '未知'));
+  recog.onend = () => { recog = null; updateComposer(); };
+  try { recog.start(); toast('正在聆听…'); } catch (e) { recog = null; toast('无法启动语音识别'); }
+  updateComposer();
+}
+
+/* ---------- 设置页 ---------- */
+function openSettingsPage() {
   closeSidebar();
+  renderSettingsPage();
+  const pg = $('#settings-page'); pg.hidden = false;
+  requestAnimationFrame(() => pg.classList.add('show'));
+}
+function closeSettingsPage() {
+  const pg = $('#settings-page'); pg.classList.remove('show');
+  setTimeout(() => { if (!pg.classList.contains('show')) pg.hidden = true; }, 260);
+}
+function fmtBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(2) + ' MB';
+}
+const chatBytes = () => new Blob([JSON.stringify(S.convs)]).size;
+const THEME_LABEL = { auto: '跟随系统', light: '浅色', dark: '深色' };
+function renderSettingsPage() {
+  const body = $('#settings-body'); body.innerHTML = '';
   const st = S.settings;
-  const theme = seg([['auto', '跟随系统'], ['light', '浅色'], ['dark', '深色']], st.theme, async (v) => { st.theme = v; applyTheme(); await saveSettings(); });
+  const dm = resolveTarget(null);
+  const row = (ic, label, { value, onClick, soon } = {}) => h('button', {
+    class: 'set-row' + (soon ? ' soon' : ''), disabled: !!soon, onclick: onClick,
+  }, icon(ic), h('span', { class: 'sr-label' }, label), h('span', { class: 'sr-value' }, soon ? '即将推出' : (value || '')), soon ? null : icon('chevright'));
+  const group = (title, ...rows) => [h('div', { class: 'set-title' }, title), h('div', { class: 'set-card' }, rows)];
+  const msgCount = S.convs.reduce((n, c) => n + c.messages.length, 0);
+  body.append(
+    ...group('通用设置',
+      row('palette', '颜色模式', { value: THEME_LABEL[st.theme] || '跟随系统', onClick: openThemeSheet }),
+      row('monitor', '偏好设置', { onClick: openPrefs }),
+      row('bot', '助手', { value: `${S.personas.length} 个`, onClick: openPersonas })),
+    ...group('模型与服务',
+      row('heart', '默认模型', { value: dm ? dm.model : '未设置', onClick: openDefaultModel }),
+      row('boxes', '供应商', { value: `${S.providers.length} 个`, onClick: openProviders }),
+      row('globe', '搜索服务', { soon: true }),
+      row('terminal', 'MCP', { soon: true }),
+      row('brain', '记忆', { soon: true })),
+    ...group('数据设置',
+      row('database', '数据备份', { onClick: openBackup }),
+      row('drive', '聊天记录存储', { value: fmtBytes(chatBytes()), onClick: openStorage })),
+    ...group('关于',
+      row('info', '关于', { value: `v${APP_VERSION}`, onClick: openAbout }),
+      row('chart', '统计', { value: `${S.convs.filter((c) => c.messages.length).length} 个对话 · ${msgCount} 条消息`, onClick: openStats }),
+      row('book', '使用文档', { onClick: () => window.open('https://github.com/fallon40480211-create/groky-chat#readme', '_blank', 'noopener') })),
+  );
+}
+function openThemeSheet() {
+  const st = S.settings;
+  openSheet({ title: '颜色模式', body: [h('div', { class: 'field' }, seg([['auto', '跟随系统'], ['light', '浅色'], ['dark', '深色']], st.theme, async (v) => { st.theme = v; applyTheme(); await saveSettings(); renderSettingsPage(); }))] });
+}
+function openPrefs() {
+  const st = S.settings;
+  const name = h('input', { type: 'text', placeholder: '我', maxlength: 20 }); name.value = st.userName || '';
+  name.addEventListener('change', async () => { st.userName = name.value.trim(); await saveSettings(); renderUser(); });
   const enter = h('input', { type: 'checkbox', class: 'switch' }); enter.checked = !!st.enterSend;
   enter.addEventListener('change', async () => { st.enterSend = enter.checked; await saveSettings(); });
-  const dm = modelSelect(st.defaultModel);
-  dm.addEventListener('change', async () => { st.defaultModel = parseModelValue(dm.value); await saveSettings(); renderAll(); });
-  const dp = personaSelect(st.defaultPersonaId);
-  dp.addEventListener('change', async () => { st.defaultPersonaId = dp.value || null; await saveSettings(); });
   const ctx = h('select', {}, [['0', '全部历史'], ['6', '最近 6 条'], ['10', '最近 10 条'], ['20', '最近 20 条'], ['40', '最近 40 条']].map(([v, l]) => h('option', { value: v }, l)));
   ctx.value = String(st.maxContext || 0);
   ctx.addEventListener('change', async () => { st.maxContext = Number(ctx.value); await saveSettings(); });
+  const dp = personaSelect(st.defaultPersonaId);
+  dp.addEventListener('change', async () => { st.defaultPersonaId = dp.value || null; await saveSettings(); });
+  openSheet({ title: '偏好设置', onClose: () => { if ((name.value.trim()) !== (st.userName || '')) { st.userName = name.value.trim(); saveSettings(); } renderUser(); }, body: [
+    field('我的名字', name, '显示在侧栏底部与导出的对话中'),
+    h('div', { class: 'switch-row' }, h('div', { class: 'sr-text' }, '回车键发送', h('small', {}, '关闭时回车换行，点按钮发送')), enter),
+    field('默认上下文消息数', ctx), field('新对话默认助手', dp),
+  ] });
+}
+function openDefaultModel() {
+  const st = S.settings;
+  const dm = modelSelect(st.defaultModel);
+  dm.addEventListener('change', async () => { st.defaultModel = parseModelValue(dm.value); await saveSettings(); renderAll(); renderSettingsPage(); });
+  openSheet({ title: '默认模型', body: [field('新对话使用的模型', dm, S.providers.length ? '每个对话仍可在输入栏单独切换模型' : null),
+    !S.providers.length ? h('button', { class: 'btn', style: { width: '100%' }, onclick: () => openProviders() }, '＋ 添加模型服务') : null] });
+}
+function openBackup() {
   const withKeys = h('input', { type: 'checkbox', class: 'switch' }); withKeys.checked = true;
   const file = h('input', { type: 'file', accept: 'application/json,.json', style: { display: 'none' } });
   file.addEventListener('change', async () => { const f = file.files[0]; if (f) await importData(f); file.value = ''; });
-
-  openSheet({
-    title: '设置',
-    body: [
-      h('div', { class: 'field' }, h('label', {}, '主题'), theme),
-      h('div', { class: 'switch-row' }, h('div', { class: 'sr-text' }, '回车键发送', h('small', {}, '关闭时回车换行，点按钮发送')), enter),
-      field('默认模型', dm), field('新对话默认角色', dp), field('发送的上下文消息数', ctx),
-      h('div', { class: 'section-title' }, '数据'),
-      h('div', { class: 'switch-row' }, h('div', { class: 'sr-text' }, '导出时包含 API Key', h('small', {}, '备份文件请妥善保管')), withKeys),
-      h('div', { class: 'input-row' },
-        h('button', { class: 'btn', style: { flex: 1 }, onclick: () => exportData(withKeys.checked) }, '导出 JSON'),
-        h('button', { class: 'btn', style: { flex: 1 }, onclick: () => file.click() }, '导入 JSON'), file),
-      h('button', { class: 'btn danger', style: { width: '100%', marginTop: '10px' }, onclick: clearAll }, '清空所有数据'),
-      h('div', { class: 'section-title' }, '关于'),
-      h('p', { class: 'muted' }, `groky chat v${APP_VERSION} · 纯前端应用，没有服务器；对话与密钥只保存在本机浏览器。在 Safari 中点“分享 → 添加到主屏幕”即可像 App 一样使用。`),
-    ],
-  });
+  openSheet({ title: '数据备份', body: [
+    h('div', { class: 'switch-row' }, h('div', { class: 'sr-text' }, '导出时包含 API Key', h('small', {}, '备份文件请妥善保管')), withKeys),
+    h('div', { class: 'input-row' },
+      h('button', { class: 'btn', style: { flex: 1 }, onclick: () => exportData(withKeys.checked) }, '导出 JSON'),
+      h('button', { class: 'btn', style: { flex: 1 }, onclick: () => file.click() }, '导入 JSON'), file),
+    h('p', { class: 'muted' }, '导入会与现有数据合并，相同 ID 的条目会被覆盖。'),
+  ] });
+}
+async function openStorage() {
+  let est = null; try { est = await navigator.storage?.estimate?.(); } catch { /* ignore */ }
+  openSheet({ title: '聊天记录存储', body: [
+    h('div', { class: 'set-card' },
+      h('div', { class: 'kv' }, h('span', {}, '聊天记录'), h('b', {}, fmtBytes(chatBytes()))),
+      h('div', { class: 'kv' }, h('span', {}, '对话数'), h('b', {}, String(S.convs.length))),
+      est ? h('div', { class: 'kv' }, h('span', {}, '本站已用 / 配额'), h('b', {}, `${fmtBytes(est.usage || 0)} / ${fmtBytes(est.quota || 0)}`)) : null),
+    h('button', { class: 'btn danger', style: { width: '100%', marginTop: '14px' }, onclick: clearAll }, '清空所有数据'),
+    h('p', { class: 'muted' }, '所有数据只存在本设备浏览器的 IndexedDB 中；清空前建议先导出备份。'),
+  ] });
+}
+function openAbout() {
+  openSheet({ title: '关于', body: [h('div', { class: 'about' },
+    h('img', { src: 'icons/icon-192.png', alt: '' }), h('h3', {}, 'groky chat'), h('p', { class: 'muted' }, `版本 v${APP_VERSION}`),
+    h('p', {}, '纯前端 AI 聊天客户端，没有服务器；对话与密钥只保存在本机浏览器。在 Safari 中点“分享 → 添加到主屏幕”即可像 App 一样使用。'))] });
+}
+function openStats() {
+  const msgs = S.convs.flatMap((c) => c.messages);
+  const byModel = {};
+  for (const m of msgs) if (m.role === 'assistant' && m.model) byModel[m.model] = (byModel[m.model] || 0) + 1;
+  openSheet({ title: '统计', body: [h('div', { class: 'set-card' },
+    h('div', { class: 'kv' }, h('span', {}, '对话'), h('b', {}, String(S.convs.length))),
+    h('div', { class: 'kv' }, h('span', {}, '我的消息'), h('b', {}, String(msgs.filter((m) => m.role === 'user').length))),
+    h('div', { class: 'kv' }, h('span', {}, 'AI 回复'), h('b', {}, String(msgs.filter((m) => m.role === 'assistant').length))),
+    ...Object.entries(byModel).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k, v]) => h('div', { class: 'kv' }, h('span', {}, k), h('b', {}, String(v)))))] });
 }
 
 async function exportData(includeKeys) {
@@ -969,7 +1254,7 @@ async function clearAll() {
 }
 
 /* ================= 布局 & 事件 ================= */
-function openSidebar() { document.body.classList.add('side-open'); renderConvList(); }
+function openSidebar() { document.body.classList.add('side-open'); renderSide(); }
 function closeSidebar() { document.body.classList.remove('side-open'); }
 
 function autoGrow() {
@@ -985,10 +1270,19 @@ function bindEvents() {
   $('#btn-new').addEventListener('click', () => newConv());
   $('#btn-new-side').addEventListener('click', () => newConv());
   $('#btn-conv-settings').addEventListener('click', openConvSettings);
+  $('#btn-tune').addEventListener('click', openConvSettings);
+  $('#btn-settings').addEventListener('click', openSettingsPage);
+  $('#btn-user').addEventListener('click', () => { closeSidebar(); openPrefs(); });
+  $('#settings-back').addEventListener('click', closeSettingsPage);
+  $('#btn-scope').addEventListener('click', () => { S.scopeAll = !S.scopeAll; renderConvList(); });
   $('#conv-search').addEventListener('input', (e) => { S.search = e.target.value; renderConvList(); });
-  document.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => {
-    ({ providers: openProviders, personas: openPersonas, settings: openSettings })[b.dataset.open]();
-  }));
+  $('#tool-model').addEventListener('click', openModelPicker);
+  $('#tool-persona').addEventListener('click', openPersonaPicker);
+  $('#tool-think').addEventListener('click', openThinkPicker);
+  $('#tool-ctx').addEventListener('click', openCtxPicker);
+  $('#tool-more').addEventListener('click', openMoreMenu);
+  $('#tool-mic').addEventListener('click', toggleMic);
+  if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) $('#tool-mic').classList.add('unavailable');
   const input = $('#input');
   input.addEventListener('input', autoGrow);
   input.addEventListener('keydown', (e) => {
@@ -1011,9 +1305,31 @@ function bindEvents() {
   // iOS 键盘弹出时保持布局贴合可视区域
   const vv = window.visualViewport;
   if (vv) {
-    const fit = () => { document.documentElement.style.setProperty('--app-h', vv.height + 'px'); if (vv.offsetTop) window.scrollTo(0, 0); };
-    vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); fit();
+    const root = document.documentElement;
+    let raf = 0, lastH = 0;
+    const apply = () => {
+      raf = 0;
+      if (vv.offsetTop && !document.querySelector('.sheet')) window.scrollTo(0, 0);
+      const layoutH = root.clientHeight || window.innerHeight;
+      const kb = Math.max(0, Math.round(layoutH - vv.height - vv.offsetTop));
+      root.style.setProperty('--app-h', vv.height + 'px');
+      root.style.setProperty('--vv-h', vv.height + 'px');
+      root.style.setProperty('--vv-top', vv.offsetTop + 'px');
+      root.style.setProperty('--kb', kb + 'px');
+      // 键盘弹出（或可视区明显变矮）时切换为“整张面板可滚动”模式
+      const kbOpen = kb > 80 || (isEditable(document.activeElement) && vv.height < layoutH * 0.75);
+      root.classList.toggle('kb-open', kbOpen);
+      if (kbOpen && Math.abs(vv.height - lastH) > 1) revealFocused(50);
+      lastH = vv.height;
+    };
+    const fit = () => { if (!raf) raf = requestAnimationFrame(apply); };
+    vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); window.addEventListener('orientationchange', fit); apply();
+    document.addEventListener('focusout', () => setTimeout(fit, 50));
   }
+  // 面板内输入框聚焦时，等键盘动画结束后滚动到可视区中央
+  document.addEventListener('focusin', (e) => {
+    if (isEditable(e.target) && e.target.closest('.sheet')) { revealFocused(120); revealFocused(400); }
+  });
 }
 
 async function init() {
