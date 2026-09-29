@@ -1,9 +1,9 @@
 /* groky chat service worker：只缓存本站静态外壳，绝不拦截跨域（API）请求 */
-const VERSION = 'groky-v1.1.0';
+const VERSION = 'groky-v1.2.0';
 const ASSETS = [
   './', 'index.html', 'style.css', 'app.js', 'manifest.json',
   'vendor/marked.min.js', 'vendor/purify.min.js', 'vendor/highlight.min.js',
-  'vendor/hl-light.css', 'vendor/hl-dark.css',
+  'vendor/hl-light.css', 'vendor/hl-dark.css', 'vendor/katex/katex.min.js', 'vendor/katex/katex.min.css',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'
 ];
 

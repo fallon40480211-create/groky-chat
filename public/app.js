@@ -1,5 +1,5 @@
 /* groky chat —— 纯前端 AI 聊天客户端。所有数据（含 API Key）只保存在本机 IndexedDB。 */
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 
 /* ================= 小工具 ================= */
 const $ = (s, r = document) => r.querySelector(s);
@@ -48,6 +48,41 @@ const ICONS = {
   close: L('<path d="M6 6l12 12M18 6 6 18"/>', 1.9),
   back: L('<path d="M19 12H5M11 6l-6 6 6 6"/>', 1.9),
   check: L('<path d="M5 12l5 5L20 7"/>', 2.2),
+  paint: L('<path d="M12 21a9 9 0 1 1 9-9c0 2.5-2 3.5-3.5 3.5H15a2 2 0 0 0-1.5 3.3A1.4 1.4 0 0 1 12 21Z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="15.5" cy="8.5" r="1"/>'),
+  translate: L('<path d="M4 5h9M8.5 3v2M6 5c.5 3 2.5 5.5 5 7M11 5c-.7 3.5-3 6.5-6.5 8"/><path d="m12 21 4-9 4 9M13.5 18h5"/>'),
+  chatdots: L('<path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.3A8.5 8.5 0 1 1 21 12Z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/>', 1.9),
+  textfmt: L('<path d="M4 19h8M5.5 14 9 5l3.5 9M6.6 11h4.8M15 8h5M15 12h5M15 16h5"/>'),
+  pie: L('<path d="M21 12A9 9 0 1 1 12 3v9Z"/><path d="M21 12a9 9 0 0 0-9-9"/>'),
+  image: L('<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L6 21"/>'),
+  msgsq: L('<path d="M20 4H4v13h4v4l5-4h7Z"/>'),
+  refresh: L('<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16m0 4v-4h-4"/>'),
+  vibrate: L('<rect x="8" y="4" width="8" height="16" rx="1.5"/><path d="M4 9l-2 3 2 3M20 9l2 3-2 3"/>'),
+  activity: L('<path d="M3 12h4l3-8 4 16 3-8h4"/>'),
+  type: L('<path d="M5 6V4h14v2M12 4v16M9 20h6"/>'),
+  code: L('<path d="m8 7-5 5 5 5M16 7l5 5-5 5"/>'),
+  fontsize: L('<path d="M3 18 8 6l5 12M4.8 14h6.4"/><circle cx="17.5" cy="15.5" r="2.5"/><path d="M20 13v5"/>'),
+  arrowdown: L('<path d="M12 5v14M6 13l6 6 6-6"/>'),
+  arrowup: L('<path d="M12 19V5M6 11l6-6 6 6"/>'),
+  rect: L('<rect x="3" y="7" width="18" height="10" rx="2.5"/>'),
+  user: L('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
+  clock: L('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
+  dots: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>',
+  hash: L('<path d="M5 9h15M4 15h15M10 3 8 21M16 3l-2 18"/>'),
+  listnum: L('<path d="M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>'),
+  wrap: L('<path d="M3 6h18M3 12h15a3 3 0 0 1 0 6h-4M3 18h7"/><path d="m16 16-2 2 2 2"/>'),
+  collapse: L('<path d="M12 3v6M9 6l3 3 3-3M12 21v-6M9 18l3-3 3 3M4 12h2M10 12h4M18 12h2"/>'),
+  alert: L('<path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.3A8.5 8.5 0 1 1 21 12Z"/><path d="M12 8v4M12 15.5h.01"/>'),
+  sun: L('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
+  calendar: L('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+  sidebar: L('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>'),
+  wrench: L('<path d="M14.7 6.3a4 4 0 0 0 5 5L21 13l-8 8-3-3 .5-.5a4 4 0 0 0-5-5L3 10.7 6.3 7.4a4 4 0 0 0 5 5"/>'),
+  file: L('<path d="M14 3H6v18h12V7Z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>'),
+  sparkles: L('<path d="M10 3l1.8 5.2L17 10l-5.2 1.8L10 17l-1.8-5.2L3 10l5.2-1.8Z"/><path d="M18 3v4M16 5h4M18 15v4M16 17h4"/>'),
+  download: L('<path d="M12 4v11M7 10l5 5 5-5M4 20h16"/>'),
+  upload: L('<path d="M12 20V9M7 14l5-5 5 5M4 4h16"/>'),
+  branch: L('<circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M6 8c0 4 6 4 6 8M18 8c0 4-6 4-6 8"/>'),
+  imageoff: L('<path d="M3 3l18 18M21 15V3H9M3 7v14h14"/><path d="m3 17 5-5 3 3"/>'),
+  infoc: L('<circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/>', 1.5),
 };
 function icon(name) { const s = document.createElement('span'); s.dataset.icon = name; s.innerHTML = ICONS[name] || ''; return s; }
 function fillIcons(root = document) { root.querySelectorAll('[data-icon]').forEach((el) => { if (!el.firstChild) el.innerHTML = ICONS[el.dataset.icon] || ''; }); }
@@ -121,12 +156,31 @@ const idb = {
   all: (s) => tx(s, 'readonly', (st) => st.getAll()),
   get: (s, k) => tx(s, 'readonly', (st) => st.get(k)),
   put: (s, v, k) => tx(s, 'readwrite', (st) => (k === undefined ? st.put(clone(v)) : st.put(clone(v), k))),
+  putRaw: (s, v, k) => tx(s, 'readwrite', (st) => st.put(v, k)), // 保存 Blob（字体 / 背景图）
+
   del: (s, k) => tx(s, 'readwrite', (st) => st.delete(k)),
   clear: (s) => tx(s, 'readwrite', (st) => st.clear()),
 };
 
 /* ================= 状态 ================= */
-const DEFAULT_SETTINGS = { theme: 'auto', enterSend: false, defaultModel: null, defaultPersonaId: null, maxContext: 0, userName: '', currentAssistantId: null, asstOpen: true };
+const DEFAULT_SETTINGS = {
+  theme: 'auto', enterSend: false, defaultModel: null, defaultPersonaId: null, maxContext: 0, userName: '', currentAssistantId: null, asstOpen: true,
+  // 主题
+  themeId: 'default', pureBg: true, customThemes: [],
+  // 聊天项显示
+  showUserAvatar: false, showUserName: false, showUserTime: false, showUserActions: true, showTitleAvatar: false,
+  showModelName: true, showModelTime: false, showProvider: false, showTokenStats: false, showThinking: true,
+  // 渲染
+  dollarMath: true, mathRender: true, userMarkdown: false, reasoningMarkdown: false, assistantMarkdown: true,
+  codeCollapse: false, codeCollapseLines: 20, mobileCodeWrap: false,
+  // 行为
+  autoCollapseThinking: true, regenDeleteBelow: true, confirmRegen: false, collapseLong: false, keepAwake: false,
+  showListDates: true, keepDrawerOnAssistant: false, msgNav: 'scroll',
+  // 外观与其他
+  language: 'zh-CN', chatFontScale: 100, appFont: 'system', codeFont: 'system', appFontName: '', codeFontName: '',
+  autoBottomDelay: 0, bgImage: false, bgMask: 60, composerAlpha: 100, msgStyle: 'bubble', haptics: true,
+  retryEnabled: true, retryCount: 2, retryDelay: 2,
+};
 const S = {
   providers: [], personas: [], convs: [], settings: { ...DEFAULT_SETTINGS },
   currentId: null, streaming: null, search: '', editingMsgId: null, scopeAll: false,
@@ -218,7 +272,8 @@ async function readError(res) {
   try { t = await res.text(); } catch { /* ignore */ }
   let msg = t;
   try { const j = JSON.parse(t); msg = j.error?.message || j.message || j.error || t; if (typeof msg !== 'string') msg = JSON.stringify(msg); } catch { /* not json */ }
-  return new Error(`HTTP ${res.status}${res.statusText ? ' ' + res.statusText : ''}${msg ? '：' + String(msg).slice(0, 600) : ''}`);
+  const err = new Error(`HTTP ${res.status}${res.statusText ? ' ' + res.statusText : ''}${msg ? '：' + String(msg).slice(0, 600) : ''}`);
+  err.status = res.status; return err;
 }
 
 /** 合并连续同角色消息、去掉空消息（Anthropic 要求严格交替） */
@@ -238,7 +293,7 @@ function normalizeHistory(msgs) {
  * 统一的流式聊天调用。onDelta({text?, reasoning?})
  */
 const THINK_BUDGET = { low: 1024, medium: 4096, high: 12000 };
-async function streamChat({ provider, model, system, messages, temperature, think, signal, onDelta }) {
+async function streamChat({ provider, model, system, messages, temperature, think, includeUsage, signal, onDelta }) {
   const base = apiBase(provider);
   if (!base) throw new Error('该服务未配置 Base URL');
   const history = normalizeHistory(messages);
@@ -261,6 +316,8 @@ async function streamChat({ provider, model, system, messages, temperature, thin
     for await (const ev of sseEvents(res)) {
       let j; try { j = JSON.parse(ev.data); } catch { continue; }
       const type = j.type || ev.event;
+      if (type === 'message_start' && j.message?.usage) onDelta({ usage: { input: j.message.usage.input_tokens ?? null } });
+      else if (type === 'message_delta' && j.usage) onDelta({ usage: { output: j.usage.output_tokens ?? null } });
       if (type === 'content_block_delta') {
         const d = j.delta || {};
         if (d.type === 'text_delta' && d.text) onDelta({ text: d.text });
@@ -278,7 +335,8 @@ async function streamChat({ provider, model, system, messages, temperature, thin
   msgs.push(...history);
   const body = { model, messages: msgs, stream: true };
   if (temperature != null) body.temperature = temperature;
-  if (think) body.reasoning_effort = think; // OpenAI 兼容推理强度（仅推理模型支持）
+  if (think) body.reasoning_effort = think;
+  if (includeUsage) body.stream_options = { include_usage: true }; // 仅在开启 Token 统计时请求 usage // OpenAI 兼容推理强度（仅推理模型支持）
   const res = await fetch(base + '/chat/completions', {
     method: 'POST', signal,
     headers: { 'Content-Type': 'application/json', ...authHeaders(provider) },
@@ -290,6 +348,7 @@ async function streamChat({ provider, model, system, messages, temperature, thin
     const j = await res.json();
     if (j.error) throw new Error(j.error.message || JSON.stringify(j.error));
     const m = j.choices?.[0]?.message || {};
+    if (j.usage) onDelta({ usage: { input: j.usage.prompt_tokens ?? null, output: j.usage.completion_tokens ?? null } });
     if (m.reasoning_content) onDelta({ reasoning: m.reasoning_content });
     onDelta({ text: m.content || '' });
     return;
@@ -298,6 +357,7 @@ async function streamChat({ provider, model, system, messages, temperature, thin
     if (ev.data === '[DONE]') break;
     let j; try { j = JSON.parse(ev.data); } catch { continue; }
     if (j.error) throw new Error(j.error.message || JSON.stringify(j.error));
+    if (j.usage) onDelta({ usage: { input: j.usage.prompt_tokens ?? null, output: j.usage.completion_tokens ?? null } });
     const d = j.choices?.[0]?.delta;
     if (!d) continue;
     const r = d.reasoning_content || d.reasoning;
@@ -334,7 +394,7 @@ function allModels() {
   return out;
 }
 function resolveTarget(c) {
-  const sel = c?.target || S.settings.defaultModel;
+  const sel = c?.target || personaOf(c)?.model || S.settings.defaultModel;
   if (sel) {
     const p = S.providers.find((x) => x.id === sel.providerId);
     if (p && (p.models || []).includes(sel.model)) return { provider: p, model: sel.model };
@@ -356,33 +416,190 @@ function temperatureOf(c) {
 
 /* ================= 主题 ================= */
 const mqDark = matchMedia('(prefers-color-scheme: dark)');
+/* ---------- 颜色工具 ---------- */
+const hexRgb = (hx) => { let x = String(hx || '').replace('#', ''); if (x.length === 3) x = [...x].map((c) => c + c).join(''); const n = parseInt(x, 16); return Number.isNaN(n) ? [0, 0, 0] : [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const rgbHex = (r) => '#' + r.map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
+const mix = (a, b, t) => { const x = hexRgb(a), y = hexRgb(b); return rgbHex(x.map((v, i) => v * t + y[i] * (1 - t))); }; // t = a 的占比
+const lum = (hx) => { const c = hexRgb(hx).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+const validHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(v || '').trim());
+
+/* ---------- 主题 ---------- */
+const PRESET_THEMES = [
+  { id: 'default', name: '默认', accent: '#d97757' },
+  { id: 'ocean', name: '海霄蓝', accent: '#3f5c96' },
+  { id: 'bamboo', name: '竹影绿', accent: '#2f6b4b' },
+  { id: 'dusk', name: '暮紫韵', accent: '#5b5497' },
+  { id: 'amber', name: '琥珀金', accent: '#7c5518' },
+  { id: 'rose', name: '暮霭玫', accent: '#7b4f6b' },
+  { id: 'terra', name: '陶砂红', accent: '#80503d' },
+  { id: 'ink', name: '纸墨灰', accent: '#111111' },
+  { id: 'cherry', name: '樱桃绿', accent: '#4fb36d' },
+];
+const BASE = {
+  light: { bg: '#fcfcfb', bg2: '#ffffff', card: '#f5f5f4', s2: '#f3f3f2', bubble: '#f1f1ef', surface: '#ffffff' },
+  dark: { bg: '#151515', bg2: '#1b1b1c', card: '#1f1f21', s2: '#2a2a2c', bubble: '#2a2a2c', surface: '#232325' },
+};
+function allThemes() { return [...PRESET_THEMES, ...(S.settings.customThemes || [])]; }
+function currentTheme() { return allThemes().find((t) => t.id === S.settings.themeId) || PRESET_THEMES[0]; }
+function themeVars(theme, mode) {
+  const b = BASE[mode];
+  let acc = validHex(theme.accent) ? theme.accent : PRESET_THEMES[0].accent;
+  if (mode === 'dark') { let i = 0; while (lum(acc) < 0.2 && i++ < 10) acc = mix(acc, '#ffffff', 0.85); }
+  else { let i = 0; while (lum(acc) > 0.45 && i++ < 10) acc = mix(acc, '#000000', 0.88); }
+  const v = {
+    '--accent': acc,
+    '--accent-2': mode === 'dark' ? mix(acc, '#ffffff', 0.85) : mix(acc, '#000000', 0.85),
+    '--on-accent': lum(acc) > 0.4 ? '#111111' : '#ffffff',
+    '--accent-soft': mix(acc, b.bg, mode === 'dark' ? 0.22 : 0.13),
+    '--user-bubble': validHex(theme.bubble) ? (mode === 'dark' ? mix(theme.bubble, b.bubble, 0.3) : theme.bubble) : mix(acc, b.bubble, mode === 'dark' ? 0.2 : 0.1),
+  };
+  if (!S.settings.pureBg) Object.assign(v, {
+    '--bg': mix(acc, b.bg, 0.05), '--bg-2': mix(acc, b.bg2, 0.04), '--card': mix(acc, b.card, 0.07), '--surface-2': mix(acc, b.s2, 0.08),
+  });
+  return v;
+}
+let appliedVars = [];
 function applyTheme() {
   const t = S.settings.theme === 'auto' ? (mqDark.matches ? 'dark' : 'light') : S.settings.theme;
-  document.documentElement.dataset.theme = t;
+  const root = document.documentElement;
+  root.dataset.theme = t;
   $('#hl-light').disabled = t === 'dark';
   $('#hl-dark').disabled = t !== 'dark';
-  const color = t === 'dark' ? '#151515' : '#fcfcfb';
+  for (const k of appliedVars) root.style.removeProperty(k);
+  const vars = themeVars(currentTheme(), t);
+  for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);
+  appliedVars = Object.keys(vars);
+  const color = vars['--bg'] || BASE[t].bg;
   document.querySelectorAll('meta[name=theme-color]').forEach((m) => m.setAttribute('content', color));
 }
+
+/* ---------- 字体 / 背景 / 外观 ---------- */
+const SYS_FONT = '-apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI", sans-serif';
+const APP_FONTS = {
+  system: { label: '系统默认', css: SYS_FONT },
+  rounded: { label: '圆体', css: `ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", ${SYS_FONT}` },
+  serif: { label: '宋体 / 衬线', css: '"Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", ui-serif, serif' },
+  kai: { label: '楷体', css: '"Kaiti SC", "STKaiti", "KaiTi", "Noto Serif CJK SC", serif' },
+  local: { label: '本地文件', css: `"GrokyAppLocal", ${SYS_FONT}` },
+};
+const MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace';
+const CODE_FONTS = {
+  system: { label: '系统等宽', css: MONO },
+  courier: { label: 'Courier', css: `"Courier New", Courier, ${MONO}` },
+  local: { label: '本地文件', css: `"GrokyCodeLocal", ${MONO}` },
+};
+const loadedFonts = {};
+async function loadLocalFont(kind) {
+  const rec = await idb.get('kv', `font-${kind}`).catch(() => null);
+  const data = rec?.data || (rec?.blob ? await rec.blob.arrayBuffer() : null);
+  if (!data) return false;
+  const family = kind === 'app' ? 'GrokyAppLocal' : 'GrokyCodeLocal';
+  try {
+    if (loadedFonts[kind]) document.fonts.delete(loadedFonts[kind]);
+    const ff = new FontFace(family, data);
+    await ff.load(); document.fonts.add(ff); loadedFonts[kind] = ff;
+    return true;
+  } catch (e) { console.warn('字体加载失败', e); toast('字体文件无法解析：' + (e.message || e)); return false; }
+}
+let bgUrl = null;
+async function loadBgImage() {
+  if (bgUrl) { URL.revokeObjectURL(bgUrl); bgUrl = null; }
+  const rec = S.settings.bgImage ? await idb.get('kv', 'bg-image').catch(() => null) : null;
+  const blob = rec instanceof Blob ? rec : rec?.data ? new Blob([rec.data], { type: rec.type || 'image/*' }) : null;
+  if (blob) bgUrl = URL.createObjectURL(blob);
+  applyPrefs();
+}
+function applyPrefs() {
+  const st = S.settings, root = document.documentElement;
+  root.style.setProperty('--font-app', (APP_FONTS[st.appFont] || APP_FONTS.system).css);
+  root.style.setProperty('--font-code', (CODE_FONTS[st.codeFont] || CODE_FONTS.system).css);
+  root.style.setProperty('--chat-scale', String((Number(st.chatFontScale) || 100) / 100));
+  root.style.setProperty('--composer-alpha', `${Math.max(0, Math.min(100, Number(st.composerAlpha ?? 100)))}%`);
+  root.style.setProperty('--bg-mask', String(Math.max(0, Math.min(100, Number(st.bgMask ?? 60))) / 100));
+  root.style.setProperty('--chat-bg', bgUrl ? `url("${bgUrl}")` : 'none');
+  root.classList.toggle('has-bg', !!bgUrl);
+  root.classList.toggle('code-wrap-mobile', !!st.mobileCodeWrap);
+  root.classList.toggle('msg-plain', st.msgStyle === 'plain');
+}
+function haptic(ms = 10) { if (S.settings.haptics && navigator.vibrate) { try { navigator.vibrate(ms); } catch { /* ignore */ } } }
 mqDark.addEventListener?.('change', applyTheme);
 
-/* ================= Markdown ================= */
-function renderMd(text) {
-  const html = window.marked ? marked.parse(text || '', { gfm: true, breaks: true }) : (text || '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-  return window.DOMPurify ? DOMPurify.sanitize(html) : html;
+/* ================= Markdown & 数学公式 ================= */
+const escHtml = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let katexPromise = null;
+function loadKatex() {
+  return katexPromise ||= new Promise((res) => {
+    document.head.append(h('link', { rel: 'stylesheet', href: 'vendor/katex/katex.min.css' }));
+    const sc = h('script', { src: 'vendor/katex/katex.min.js' });
+    sc.onload = () => res(true); sc.onerror = () => res(false);
+    document.head.append(sc);
+  }).then((ok) => { if (ok && !S.streaming) renderMessages(); return ok; });
 }
-function enhanceMd(el) {
-  el.querySelectorAll('pre > code').forEach((code) => {
+/** 把公式替换成占位符（跳过代码块 / 行内代码），返回 { text, maths } */
+function extractMath(text) {
+  const st = S.settings, maths = [];
+  if (!st.mathRender || !text) return { text, maths };
+  const put = (tex, display) => { maths.push({ tex, display }); return `KXMATH${maths.length - 1}XK`; };
+  const conv = (seg) => {
+    seg = seg.replace(/\$\$([\s\S]+?)\$\$/g, (_, t) => put(t, true));
+    seg = seg.replace(/\\\[([\s\S]+?)\\\]/g, (_, t) => put(t, true));
+    seg = seg.replace(/\\\(([\s\S]+?)\\\)/g, (_, t) => put(t, false));
+    if (st.dollarMath) seg = seg.replace(/(^|[^\\$\w])\$(?!\s)([^\n$]+?)(?<!\s)\$(?![\w$])/g, (_, pre, t) => pre + put(t, false));
+    return seg;
+  };
+  // 按 ``` 代码块与 `行内代码` 切分，只处理普通文本
+  const out = text.split(/(```[\s\S]*?(?:```|$)|~~~[\s\S]*?(?:~~~|$)|`[^`\n]*`)/g).map((seg, i) => (i % 2 ? seg : conv(seg))).join('');
+  return { text: out, maths };
+}
+function renderMd(text, { math = true } = {}) {
+  const ex = math ? extractMath(text || '') : { text: text || '', maths: [] };
+  let html = window.marked ? marked.parse(ex.text, { gfm: true, breaks: true }) : escHtml(ex.text);
+  html = window.DOMPurify ? DOMPurify.sanitize(html) : html;
+  if (ex.maths.length) {
+    if (!window.katex) loadKatex();
+    html = html.replace(/KXMATH(\d+)XK/g, (_, i) => {
+      const m = ex.maths[Number(i)]; if (!m) return '';
+      if (!window.katex) return `<code class="math-pending">${escHtml(m.display ? `$$${m.tex}$$` : `$${m.tex}$`)}</code>`;
+      try { return katex.renderToString(m.tex, { displayMode: m.display, throwOnError: false, output: 'html', trust: false }); }
+      catch { return `<code>${escHtml(m.tex)}</code>`; }
+    });
+  }
+  return html;
+}
+const expandedCode = new Set();
+function enhanceMd(el, key = '') {
+  const st = S.settings;
+  const limit = Math.max(1, Number(st.codeCollapseLines) || 20);
+  el.querySelectorAll('pre > code').forEach((code, i) => {
     const pre = code.parentElement;
     if (pre.parentElement?.classList.contains('code-wrap')) return;
     const lang = (code.className.match(/language-([\w+#-]+)/) || [])[1] || '';
     try { if (window.hljs) hljs.highlightElement(code); } catch { /* ignore */ }
     const wrap = h('div', { class: 'code-wrap' });
     const btn = h('button', { onclick: () => copyText(code.innerText) }, '复制');
+    const lines = code.textContent.replace(/\n$/, '').split('\n').length;
+    const head = h('div', { class: 'code-head' }, h('span', {}, lang || 'code'), h('span', { class: 'grow' }));
     pre.replaceWith(wrap);
-    wrap.append(h('div', { class: 'code-head' }, h('span', {}, lang || 'code'), btn), pre);
+    if (st.codeCollapse && lines > limit) {
+      const k = `${key}:${i}`;
+      const toggle = h('button', { class: 'code-toggle' });
+      const sync = () => {
+        const open = expandedCode.has(k);
+        wrap.classList.toggle('collapsed', !open);
+        pre.style.maxHeight = open ? '' : `calc(${limit} * 1.5em + 20px)`;
+        toggle.textContent = open ? '收起' : `展开（${lines} 行）`;
+      };
+      toggle.addEventListener('click', () => { expandedCode.has(k) ? expandedCode.delete(k) : expandedCode.add(k); sync(); });
+      head.append(toggle); sync();
+    }
+    head.append(btn);
+    wrap.append(head, pre);
   });
   el.querySelectorAll('a[href]').forEach((a) => { a.target = '_blank'; a.rel = 'noopener noreferrer'; });
+}
+function mdOrText(text, useMd, key, cls = 'md') {
+  if (!useMd) return h('div', { class: cls + ' plain-text' }, text);
+  const d = h('div', { class: cls, html: renderMd(text) }); enhanceMd(d, key); return d;
 }
 
 /* ================= 渲染：侧边栏 ================= */
@@ -437,6 +654,7 @@ async function selectAssistant(p) {
     S.currentId = recent?.id || null; localStorage.setItem('groky.current', S.currentId || '');
   }
   renderAll();
+  if (!S.settings.keepDrawerOnAssistant) closeSidebar();
 }
 
 function renderConvList() {
@@ -457,8 +675,8 @@ function renderConvList() {
   }
   let last = null;
   for (const c of convs) {
-    const g = c.pinned ? '置顶' : dayLabel(c.updatedAt);
-    if (g !== last) { last = g; list.append(h('div', { class: 'conv-group' }, g)); }
+    const g = c.pinned ? '置顶' : (S.settings.showListDates ? dayLabel(c.updatedAt) : '对话');
+    if (g !== last) { last = g; if (g !== '对话' || convs[0].pinned) list.append(h('div', { class: 'conv-group' }, g)); }
     const item = h('div', { class: 'conv-item' + (c.id === S.currentId ? ' active' : ''), role: 'button', tabindex: 0, 'data-id': c.id },
       h('div', { class: 'ci-main' }, h('div', { class: 'ci-title' }, c.title || '新对话')),
       h('button', { class: 'ci-more', 'aria-label': '更多', onclick: (e) => { e.stopPropagation(); convActions(c); } }, icon('more')));
@@ -501,17 +719,64 @@ function renderHeader() {
   $('#conv-title').textContent = c?.title || '新对话';
   const t = resolveTarget(c);
   $('#conv-model').textContent = t ? `${t.model}${t.provider?.name ? ` (${t.provider.name})` : ''}` : '未选择模型';
+  const ta = $('#title-avatar'); ta.innerHTML = '';
+  ta.hidden = !S.settings.showTitleAvatar;
+  if (S.settings.showTitleAvatar) ta.append(avatarEl((c ? personaOf(c) : currentAssistant()) || { emoji: '✨' }, 'title-av'));
 }
 
-function renderMessages() {
+function renderMessages({ keepScroll = false } = {}) {
   const box = $('#messages');
   const c = currentConv();
+  const prev = box.scrollTop;
   box.innerHTML = '';
-  if (!c || !c.messages.length) { box.append(emptyState()); return; }
+  if (!c || !c.messages.length) { box.append(emptyState()); updateMsgNav(); return; }
   const wrap = h('div', { class: 'msg-wrap' });
   c.messages.forEach((m, i) => wrap.append(msgEl(c, m, i)));
   box.append(wrap);
-  box.scrollTop = box.scrollHeight;
+  if (keepScroll) setScroll(prev); else { S.follow = true; setScroll(box.scrollHeight); }
+  updateMsgNav();
+}
+/* ---------- 滚动跟随 / 自动回到底部 / 消息导航 ---------- */
+let progScroll = 0, progY = -1, followTimer = null, navTimer = null;
+function setScroll(y) { const box = $('#messages'); progScroll = Date.now(); box.scrollTop = y; progY = box.scrollTop; }
+const nearBottom = (box = $('#messages')) => box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+function onMessagesScroll() {
+  const box = $('#messages');
+  // 程序滚动：位置与我们设置的一致（或平滑滚动进行中）；否则视为用户手动滚动
+  const programmatic = Math.abs(box.scrollTop - progY) < 2 || (Date.now() - progScroll < 600 && progY === -2);
+  if (!programmatic) {
+    S.follow = nearBottom(box);
+    clearTimeout(followTimer);
+    const delay = Number(S.settings.autoBottomDelay) || 0;
+    if (!S.follow && S.streaming && delay > 0) {
+      followTimer = setTimeout(() => { if (S.streaming) { S.follow = true; setScroll(box.scrollHeight); } }, delay * 1000);
+    }
+  }
+  if (S.settings.msgNav === 'scroll') {
+    $('#msg-nav').classList.add('show');
+    clearTimeout(navTimer); navTimer = setTimeout(() => $('#msg-nav').classList.remove('show'), 1800);
+  }
+}
+function updateMsgNav() {
+  const nav = $('#msg-nav'); if (!nav) return;
+  const mode = S.settings.msgNav;
+  const has = !!currentConv()?.messages.length;
+  nav.hidden = mode === 'off' || !has;
+  nav.classList.toggle('show', mode === 'always');
+}
+function navMsg(dir) {
+  const box = $('#messages');
+  const items = [...box.querySelectorAll('.msg')];
+  if (!items.length) return;
+  const top = box.getBoundingClientRect().top;
+  const pos = items.map((e) => e.getBoundingClientRect().top - top);
+  let target;
+  if (dir < 0) target = [...pos].reverse().find((y) => y < -8);
+  else target = pos.find((y) => y > 8);
+  if (target == null) setScroll(dir < 0 ? 0 : box.scrollHeight);
+  else { progScroll = Date.now(); progY = -2; box.scrollBy({ top: target - 4, behavior: 'smooth' }); }
+  if (dir > 0 && target == null) S.follow = true;
+  haptic(6);
 }
 
 function emptyState() {
@@ -522,8 +787,29 @@ function emptyState() {
     h('button', { class: 'btn primary', onclick: () => openProviders() }, '＋ 添加模型服务'));
 }
 
+function fmtStamp(ts) {
+  if (!ts) return '';
+  const d = new Date(ts), now = new Date();
+  const hm = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  if (d.toDateString() === now.toDateString()) return hm;
+  return `${d.getFullYear() === now.getFullYear() ? '' : d.getFullYear() + '-'}${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${hm}`;
+}
+const expandedMsgs = new Set();
+const reasonOpen = new Map();
+function estimateTokens(t) {
+  t = String(t || ''); const cjk = (t.match(/[\u3000-\u9fff\uac00-\ud7af\uff00-\uffef]/g) || []).length;
+  return Math.max(0, Math.round(cjk + (t.length - cjk) / 4));
+}
+function collapsible(el, m, text) {
+  if (!S.settings.collapseLong || m.pending) return;
+  const long = (text || '').length > 1200 || (text || '').split('\n').length > 24;
+  if (!long) return;
+  const open = expandedMsgs.has(m.id);
+  el.classList.toggle('long-collapsed', !open);
+  el.append(h('button', { class: 'long-toggle', onclick: () => { open ? expandedMsgs.delete(m.id) : expandedMsgs.add(m.id); renderMessages({ keepScroll: true }); } }, open ? '收起' : '展开全文'));
+}
 function msgEl(c, m, idx) {
-  const isLast = idx === c.messages.length - 1;
+  const st = S.settings;
   const busy = !!S.streaming;
   const el = h('div', { class: `msg ${m.role}`, 'data-id': m.id });
 
@@ -536,32 +822,56 @@ function msgEl(c, m, idx) {
       setTimeout(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 30);
       return el;
     }
-    el.append(h('div', { class: 'bubble' }, m.content));
-    el.append(h('div', { class: 'msg-actions' },
-      h('button', { 'aria-label': '复制', title: '复制', onclick: () => copyText(m.content) }, icon('copy')),
-      !busy && h('button', { 'aria-label': '编辑并重发', title: '编辑并重发', onclick: () => { S.editingMsgId = m.id; renderMessages(); } }, icon('edit')),
-      !busy && h('button', { 'aria-label': '删除', title: '删除', onclick: () => deleteMsg(c, m) }, icon('trash'))));
+    const uname = (st.userName || '').trim() || '我';
+    if (st.showUserAvatar || st.showUserName || st.showUserTime) {
+      el.append(h('div', { class: 'msg-head user-head' },
+        st.showUserTime ? h('span', { class: 'msg-time' }, fmtStamp(m.createdAt)) : null,
+        st.showUserName ? h('span', { class: 'msg-name' }, uname) : null,
+        st.showUserAvatar ? h('span', { class: 'avatar user-av' }, [...uname][0].toUpperCase()) : null));
+    }
+    const bubble = h('div', { class: 'bubble' + (st.userMarkdown ? ' md-bubble' : '') }, mdOrText(m.content, st.userMarkdown, m.id, 'md'));
+    el.append(bubble);
+    collapsible(bubble, m, m.content);
+    if (st.showUserActions) {
+      el.append(h('div', { class: 'msg-actions' },
+        h('button', { 'aria-label': '复制', title: '复制', onclick: () => copyText(m.content) }, icon('copy')),
+        !busy && h('button', { 'aria-label': '编辑并重发', title: '编辑并重发', onclick: () => { S.editingMsgId = m.id; renderMessages(); } }, icon('edit')),
+        !busy && h('button', { 'aria-label': '删除', title: '删除', onclick: () => deleteMsg(c, m) }, icon('trash'))));
+    }
     return el;
   }
 
   const persona = personaOf(c);
-  el.append(h('div', { class: 'msg-head' }, h('span', { class: 'avatar' }, persona?.emoji || '✨'), h('span', {}, m.model || 'assistant')));
-  if (m.reasoning) {
-    el.append(h('details', { class: 'reasoning', open: m.pending && !m.content },
-      h('summary', {}, m.pending && !m.content ? '思考中…' : '思考过程'), h('div', { class: 'r-body' }, m.reasoning)));
+  const prov = S.providers.find((p) => p.id === m.providerId);
+  el.append(h('div', { class: 'msg-head' }, avatarEl(persona || { emoji: '✨' }, 'avatar'),
+    st.showModelName ? h('span', { class: 'msg-name' }, m.model || 'assistant', st.showProvider && prov ? h('span', { class: 'msg-prov' }, ` | ${prov.name}`) : null) : null,
+    st.showModelTime ? h('span', { class: 'msg-time' }, fmtStamp(m.createdAt)) : null));
+  if (m.reasoning && st.showThinking) {
+    const thinking = m.pending && !m.content;
+    const open = reasonOpen.has(m.id) ? reasonOpen.get(m.id) : (st.autoCollapseThinking ? thinking : true);
+    const det = h('details', { class: 'reasoning', open },
+      h('summary', {}, thinking ? '思考中…' : '思考过程'), mdOrText(m.reasoning, st.reasoningMarkdown, m.id + 'r', 'r-body'));
+    det.addEventListener('toggle', () => { if (det.open !== open || reasonOpen.has(m.id)) reasonOpen.set(m.id, det.open); });
+    el.append(det);
   }
   if (m.content) {
-    const md = h('div', { class: 'md', html: renderMd(m.content) });
-    enhanceMd(md); el.append(md);
-  } else if (m.pending && !m.reasoning) {
+    const body = mdOrText(m.content, st.assistantMarkdown, m.id, 'md');
+    el.append(body); collapsible(body, m, m.content);
+  } else if (m.pending && (!m.reasoning || !st.showThinking)) {
     el.append(h('div', { class: 'typing' }, h('i'), h('i'), h('i')));
   }
+  if (m.retrying) el.append(h('div', { class: 'msg-note' }, m.retrying));
   if (m.error) el.append(h('div', { class: 'msg-error' }, m.error));
   if (m.stopped) el.append(h('div', { class: 'msg-note' }, '已停止生成'));
+  if (!m.pending && st.showTokenStats && (m.usage || m.content)) {
+    const u = m.usage || { input: null, output: estimateTokens(m.content), estimated: true };
+    el.append(h('div', { class: 'msg-stats' },
+      `${u.estimated ? '估算 · ' : ''}${u.input != null ? `输入 ${u.input} · ` : ''}输出 ${u.output ?? '—'} tokens${m.ctxCount != null ? ` · 上下文 ${m.ctxCount} 条` : ''}`));
+  }
   if (!m.pending) {
     el.append(h('div', { class: 'msg-actions' },
       m.content && h('button', { 'aria-label': '复制', title: '复制', onclick: () => copyText(m.content) }, icon('copy')),
-      isLast && !busy && h('button', { 'aria-label': '重新生成', title: '重新生成', onclick: () => regenerate(c) }, icon('redo')),
+      !busy && h('button', { 'aria-label': '重新生成', title: '重新生成', onclick: () => regenerate(c, m) }, icon('redo')),
       !busy && h('button', { 'aria-label': '删除', title: '删除', onclick: () => deleteMsg(c, m) }, icon('trash'))));
   }
   return el;
@@ -574,11 +884,10 @@ function scheduleMsgUpdate(c, m) {
     rafPending = null;
     if (S.currentId !== c.id) return;
     const box = $('#messages');
-    const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
     const old = box.querySelector(`.msg[data-id="${m.id}"]`);
     const idx = c.messages.indexOf(m);
     if (old && idx >= 0) { const n = msgEl(c, m, idx); n.style.animation = 'none'; old.replaceWith(n); }
-    if (nearBottom) box.scrollTop = box.scrollHeight;
+    if (S.follow !== false) setScroll(box.scrollHeight);
   });
 }
 
@@ -610,7 +919,7 @@ function newConvObject() {
   const now = Date.now();
   return {
     id: uid(), title: '新对话', createdAt: now, updatedAt: now,
-    target: S.settings.defaultModel ? { ...S.settings.defaultModel } : null,
+    target: null, // 为空时依次使用：助手默认模型 → 全局默认模型
     personaId: S.settings.currentAssistantId ?? S.settings.defaultPersonaId ?? null,
     systemPrompt: '', temperature: null, messages: [],
   };
@@ -640,57 +949,105 @@ async function send() {
   if (!resolveTarget(currentConv())) { toast('请先添加模型服务'); openProviders(); return; }
   let c = currentConv();
   if (!c) c = await newConv();
-  input.value = ''; autoGrow();
+  input.value = ''; autoGrow(); haptic(8);
   c.messages.push({ id: uid(), role: 'user', content: text, createdAt: Date.now() });
   if (!c.title || c.title === '新对话') c.title = text.replace(/\s+/g, ' ').slice(0, 24);
   await generate(c);
 }
 
-async function generate(c) {
+let wakeLock = null;
+async function acquireWake() {
+  if (!S.settings.keepAwake || !('wakeLock' in navigator) || wakeLock) return;
+  try { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener?.('release', () => { wakeLock = null; }); } catch { wakeLock = null; }
+}
+function releaseWake() { try { wakeLock?.release(); } catch { /* ignore */ } wakeLock = null; }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.streaming) acquireWake(); });
+const isRetryable = (e) => e instanceof TypeError || /Failed to fetch|Load failed|NetworkError/i.test(e?.message || '') || e?.status === 429 || e?.status >= 500;
+const sleepAbortable = (ms, signal) => new Promise((res, rej) => {
+  const t = setTimeout(res, ms);
+  signal.addEventListener('abort', () => { clearTimeout(t); rej(Object.assign(new Error('aborted'), { name: 'AbortError' })); }, { once: true });
+});
+
+async function generate(c, { at = null } = {}) {
   const t = resolveTarget(c);
   if (!t) { toast('请先添加模型服务'); openProviders(); return; }
   if (!c.target) c.target = { providerId: t.provider.id, model: t.model };
+  const st = S.settings;
   const asst = { id: uid(), role: 'assistant', content: '', reasoning: '', model: t.model, providerId: t.provider.id, createdAt: Date.now(), pending: true };
-  const history = c.messages.filter((m) => !m.error || m.content).map((m) => ({ role: m.role, content: m.content }));
-  const limit = Number(c.maxContext ?? S.settings.maxContext) || 0;
+  const base = at == null ? c.messages : c.messages.slice(0, at);
+  const history = base.filter((m) => !m.error || m.content).map((m) => ({ role: m.role, content: m.content }));
+  const limit = Number(c.maxContext ?? st.maxContext) || 0;
   const ctx = limit > 0 ? history.slice(-limit) : history;
-  c.messages.push(asst); c.updatedAt = Date.now();
+  asst.ctxCount = ctx.length;
+  if (at == null) c.messages.push(asst); else c.messages.splice(at, 1, asst);
+  c.updatedAt = Date.now();
   await saveConv(c);
   const controller = new AbortController();
   S.streaming = { convId: c.id, controller, msgId: asst.id };
+  S.follow = true;
   renderAll();
+  if (at != null) { const el = $(`.msg[data-id="${asst.id}"]`); el?.scrollIntoView({ block: 'nearest' }); S.follow = false; }
+  acquireWake();
+  const system = systemPromptOf(c);
+  const usage = { input: null, output: null };
+  const maxRetry = st.retryEnabled ? Math.max(0, Math.min(10, Number(st.retryCount) || 0)) : 0;
+  const delay = Math.max(0, Number(st.retryDelay) || 0);
   try {
-    await streamChat({
-      provider: t.provider, model: t.model, system: systemPromptOf(c), messages: ctx,
-      temperature: temperatureOf(c), think: c.think || null, signal: controller.signal,
-      onDelta: (d) => {
-        if (d.text) asst.content += d.text;
-        if (d.reasoning) asst.reasoning += d.reasoning;
+    for (let attempt = 0; ; attempt++) {
+      try {
+        await streamChat({
+          provider: t.provider, model: t.model, system, messages: ctx,
+          temperature: temperatureOf(c), think: c.think || null, includeUsage: !!st.showTokenStats, signal: controller.signal,
+          onDelta: (d) => {
+            if (d.text) asst.content += d.text;
+            if (d.reasoning) asst.reasoning += d.reasoning;
+            if (d.usage) { if (d.usage.input != null) usage.input = d.usage.input; if (d.usage.output != null) usage.output = d.usage.output; }
+            if (d.text || d.reasoning) { asst.retrying = ''; scheduleMsgUpdate(c, asst); }
+          },
+        });
+        break;
+      } catch (e) {
+        if (e.name === 'AbortError' || asst.content || asst.reasoning || attempt >= maxRetry || !isRetryable(e)) throw e;
+        asst.retrying = `请求失败（${String(e.message).slice(0, 60)}），${delay} 秒后自动重试（${attempt + 1}/${maxRetry}）…`;
         scheduleMsgUpdate(c, asst);
-      },
-    });
+        await sleepAbortable(delay * 1000, controller.signal);
+        asst.retrying = `正在重试（${attempt + 1}/${maxRetry}）…`; scheduleMsgUpdate(c, asst);
+      }
+    }
     if (!asst.content && !asst.reasoning) asst.error = '模型没有返回任何内容。';
   } catch (e) {
     if (e.name === 'AbortError') asst.stopped = true;
     else asst.error = friendlyError(e);
   } finally {
-    asst.pending = false; c.updatedAt = Date.now();
+    asst.pending = false; asst.retrying = ''; c.updatedAt = Date.now();
+    if (usage.input != null || usage.output != null) asst.usage = { ...usage, estimated: false };
+    else if (asst.content || asst.reasoning) asst.usage = { input: estimateTokens(system + ctx.map((m) => m.content).join('\n')), output: estimateTokens(asst.content + asst.reasoning), estimated: true };
     S.streaming = null;
+    releaseWake(); clearTimeout(followTimer);
     await saveConv(c);
     if (rafPending) { cancelAnimationFrame(rafPending); rafPending = null; }
-    if (S.currentId === c.id) { renderMessages(); }
+    if (S.currentId === c.id) renderMessages({ keepScroll: S.follow === false });
     renderConvList(); updateComposer();
+    if (!asst.error) haptic(12);
   }
 }
 
 function stop() { S.streaming?.controller.abort(); }
 
-async function regenerate(c) {
+async function regenerate(c, m = null) {
   if (S.streaming) return;
-  const last = c.messages[c.messages.length - 1];
-  if (last?.role === 'assistant') c.messages.pop();
-  if (!c.messages.length) return;
-  await generate(c);
+  let i = m ? c.messages.indexOf(m) : c.messages.length - 1;
+  if (i < 0) return;
+  if (c.messages[i].role !== 'assistant') i = c.messages.length; // 最后一条是用户消息：直接生成
+  if (S.settings.confirmRegen && !confirm('确定重新生成这条回复吗？')) return;
+  const isLast = i >= c.messages.length - 1;
+  if (S.settings.regenDeleteBelow || isLast) {
+    c.messages = c.messages.slice(0, i);
+    if (!c.messages.length) return;
+    await generate(c);
+  } else {
+    await generate(c, { at: i }); // 仅替换这条回复，保留下面的消息
+  }
 }
 
 async function resendEdited(c, m, text) {
@@ -949,55 +1306,36 @@ function pickModels(list, selected, onPick) {
 }
 
 /* ---------- 角色 ---------- */
-function openPersonas() {
-  closeSidebar();
-  const body = h('div', {});
-  const render = () => {
-    body.innerHTML = '';
-    body.append(h('div', { class: 'list' }, S.personas.map((p) => h('button', { class: 'list-item', onclick: () => editPersona(p, render) },
-      h('span', { class: 'li-icon' }, p.emoji || '🙂'),
-      h('span', { class: 'li-main' }, h('div', { class: 'li-title' }, p.name), h('div', { class: 'li-sub' }, p.prompt || '（无系统提示）')),
-      S.settings.defaultPersonaId === p.id ? h('span', { class: 'li-badge' }, '默认') : null))));
-    if (!S.personas.length) body.append(h('p', { class: 'muted' }, '还没有角色'));
-    body.append(h('button', { class: 'btn primary', style: { width: '100%', marginTop: '10px' }, onclick: () => editPersona({ id: null, name: '', emoji: '🙂', prompt: '', temperature: null }, render) }, '＋ 新建助手'));
-    const c = currentConv();
-    if (c) {
-      body.append(h('div', { class: 'section-title' }, '当前对话使用'));
-      const ps = personaSelect(c.personaId);
-      ps.addEventListener('change', async () => { c.personaId = ps.value || null; await saveConv(c); renderAll(); toast('已切换角色'); });
-      body.append(h('div', { class: 'field' }, ps));
-    }
-  };
-  render();
-  openSheet({ title: '助手', body });
-}
+function openPersonas() { return openAssistantsPage(); }
 
 function editPersona(p, onDone) {
   const isNew = !p.id;
-  const emoji = h('input', { type: 'text', maxlength: 4, style: { width: '64px', textAlign: 'center', flex: 'none' } }); emoji.value = p.emoji || '🙂';
-  const name = h('input', { type: 'text', placeholder: '角色名称' }); name.value = p.name || '';
+  const emoji = h('input', { type: 'text', maxlength: 8, placeholder: '🙂', 'aria-label': '头像 Emoji', style: { width: '64px', textAlign: 'center', flex: 'none' } }); emoji.value = p.emoji ?? '🙂';
+  const name = h('input', { type: 'text', placeholder: '助手名称' }); name.value = p.name || '';
   const prompt = h('textarea', { placeholder: '系统提示词，例如：你是一位温柔耐心的英语老师……', style: { minHeight: '180px' } }); prompt.value = p.prompt || '';
   const temp = temperatureControl(p.temperature);
+  const msel = modelSelect(p.model || null, { allowDefault: true });
   const isDefault = h('input', { type: 'checkbox', class: 'switch' }); isDefault.checked = !isNew && S.settings.defaultPersonaId === p.id;
   const sh = openSheet({
     title: isNew ? '新建助手' : '编辑助手', back: true,
     body: [
-      h('div', { class: 'field' }, h('label', {}, '图标与名称'), h('div', { class: 'input-row' }, emoji, name)),
+      h('div', { class: 'field' }, h('label', {}, '头像 Emoji（留空显示名称首字）与名称'), h('div', { class: 'input-row' }, emoji, name)),
       field('系统提示 System Prompt', prompt),
       h('div', { class: 'field' }, h('label', {}, '默认温度'), temp.el),
-      h('div', { class: 'switch-row' }, h('div', { class: 'sr-text' }, '设为新对话默认角色'), isDefault),
+      field('默认模型', msel, '使用该助手的新对话默认用这个模型（对话里仍可切换）'),
+      h('div', { class: 'switch-row' }, h('div', { class: 'sr-text' }, '设为新对话默认助手'), isDefault),
       !isNew ? h('button', {
         class: 'btn danger', style: { width: '100%', marginTop: '10px' }, onclick: async () => {
-          if (!confirm(`删除角色“${p.name}”？`)) return;
+          if (!confirm(`删除助手“${p.name}”？`)) return;
           S.personas = S.personas.filter((x) => x.id !== p.id); await idb.del('personas', p.id);
           if (S.settings.defaultPersonaId === p.id) { S.settings.defaultPersonaId = null; await saveSettings(); }
           sh.close(); onDone?.(); renderAll();
         },
-      }, '删除角色') : null,
+      }, '删除助手') : null,
     ],
     footer: [h('button', { class: 'btn', onclick: () => sh.close() }, '取消'), h('button', {
       class: 'btn primary', onclick: async () => {
-        const d = { ...p, emoji: emoji.value.trim() || '🙂', name: name.value.trim() || '未命名角色', prompt: prompt.value, temperature: temp.get() };
+        const d = { ...p, emoji: emoji.value.trim(), name: name.value.trim() || '未命名助手', prompt: prompt.value, temperature: temp.get(), model: parseModelValue(msel.value) };
         if (isNew) { d.id = uid(); S.personas.push(d); } else { S.personas[S.personas.findIndex((x) => x.id === p.id)] = d; }
         await savePersona(d);
         if (isDefault.checked) S.settings.defaultPersonaId = d.id;
@@ -1124,7 +1462,7 @@ function renderSettingsPage() {
     ...group('通用设置',
       row('palette', '颜色模式', { value: THEME_LABEL[st.theme] || '跟随系统', onClick: openThemeSheet }),
       row('monitor', '偏好设置', { onClick: openPrefs }),
-      row('bot', '助手', { value: `${S.personas.length} 个`, onClick: openPersonas })),
+      row('bot', '助手', { value: `${S.personas.length} 个`, onClick: openAssistantsPage })),
     ...group('模型与服务',
       row('heart', '默认模型', { value: dm ? dm.model : '未设置', onClick: openDefaultModel }),
       row('boxes', '供应商', { value: `${S.providers.length} 个`, onClick: openProviders }),
@@ -1142,25 +1480,308 @@ function renderSettingsPage() {
 }
 function openThemeSheet() {
   const st = S.settings;
-  openSheet({ title: '颜色模式', body: [h('div', { class: 'field' }, seg([['auto', '跟随系统'], ['light', '浅色'], ['dark', '深色']], st.theme, async (v) => { st.theme = v; applyTheme(); await saveSettings(); renderSettingsPage(); }))] });
+  openSheet({ title: '颜色模式', body: [h('div', { class: 'field' }, seg([['auto', '跟随系统'], ['light', '浅色'], ['dark', '深色']], st.theme, async (v) => { await setSetting('theme', v); }))] });
 }
+
+/* ================= 子页面框架（Kelivo 风格：返回箭头 + 分组圆角卡片） ================= */
+const pages = [];
+function openPage({ title, render, actions = [] }) {
+  closeSidebar();
+  const body = h('div', { class: 'page-body' });
+  const back = h('button', { class: 'icon-btn page-back', 'aria-label': '返回' }, icon('arrowleft'));
+  const el = h('section', { class: 'page subpage', role: 'dialog', 'aria-label': title },
+    h('header', { class: 'page-head' }, back, h('h1', {}, title), h('span', { class: 'grow' }),
+      actions.map((a) => h('button', { class: 'icon-btn', 'aria-label': a.label, onclick: a.onClick }, icon(a.icon)))),
+    body);
+  el.style.zIndex = String(41 + pages.length);
+  const pg = { el, title, refresh: () => { const y = body.scrollTop; body.innerHTML = ''; render(body, pg); body.scrollTop = y; }, close: () => {
+    el.classList.remove('show'); const i = pages.indexOf(pg); if (i >= 0) pages.splice(i, 1);
+    setTimeout(() => el.remove(), 260);
+  } };
+  back.addEventListener('click', pg.close);
+  $('#app').append(el); pages.push(pg); pg.refresh();
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  return pg;
+}
+function refreshPages() { for (const pg of pages) pg.refresh(); if (!$('#settings-page').hidden) renderSettingsPage(); }
+async function setSetting(key, val, { silent = false } = {}) {
+  S.settings[key] = val; await saveSettings();
+  applyTheme(); applyPrefs();
+  if (!silent) { renderSide(); renderHeader(); renderMessages({ keepScroll: true }); updateComposer(); refreshPages(); }
+}
+function card(...rows) { return h('div', { class: 'set-card' }, rows.flat().filter(Boolean)); }
+function navRow(ic, label, { value, onClick, soon, info } = {}) {
+  return h('button', { class: 'set-row' + (soon ? ' soon' : ''), disabled: !!soon, onclick: onClick, 'aria-label': label },
+    icon(ic), h('span', { class: 'sr-label' }, label, info ? infoBtn(info) : null),
+    h('span', { class: 'sr-value' }, soon ? '即将推出' : (value ?? '')), soon ? null : icon('chevright'));
+}
+function infoBtn(text) {
+  return h('span', { class: 'info-btn', role: 'button', tabindex: 0, 'aria-label': '说明', onclick: (e) => { e.stopPropagation(); e.preventDefault(); toast(text, 4200); } }, icon('infoc'));
+}
+function toggleRow(ic, label, key, { info, soon, sub, onChange } = {}) {
+  const sw = h('input', { type: 'checkbox', class: 'switch', 'aria-label': label, disabled: !!soon, 'data-key': key });
+  sw.checked = soon ? false : !!S.settings[key];
+  sw.addEventListener('change', async () => { haptic(8); if (onChange) await onChange(sw.checked); else await setSetting(key, sw.checked); });
+  return h('label', { class: 'set-row toggle' + (soon ? ' soon' : '') }, icon(ic),
+    h('span', { class: 'sr-label' }, label, sub ? h('small', {}, sub) : null, soon ? h('small', {}, '即将推出') : null),
+    info ? infoBtn(info) : null, sw);
+}
+function numberRow(ic, label, key, { min = 1, max = 999, unit = '' } = {}) {
+  const inp = h('input', { type: 'number', inputmode: 'numeric', min, max, class: 'num-input', 'aria-label': label });
+  inp.value = S.settings[key];
+  inp.addEventListener('change', async () => { let v = Math.round(Number(inp.value)); if (!Number.isFinite(v)) v = S.settings[key]; v = Math.max(min, Math.min(max, v)); inp.value = v; await setSetting(key, v); });
+  return h('div', { class: 'set-row' }, icon(ic), h('span', { class: 'sr-label' }, label), inp, unit ? h('span', { class: 'sr-unit' }, unit) : null);
+}
+function sliderSheet(title, key, { min = 0, max = 100, step = 1, fmt = (v) => `${v}%`, hint } = {}) {
+  const range = h('input', { type: 'range', min, max, step, 'aria-label': title }); range.value = S.settings[key];
+  const out = h('output', {}, fmt(Number(range.value)));
+  range.addEventListener('input', () => { out.textContent = fmt(Number(range.value)); S.settings[key] = Number(range.value); applyPrefs(); });
+  range.addEventListener('change', () => setSetting(key, Number(range.value)));
+  openSheet({ title, onClose: () => setSetting(key, Number(range.value)), body: [h('div', { class: 'range-row big' }, range, out), hint ? h('p', { class: 'muted' }, hint) : null] });
+}
+
+/* ---------- 偏好设置 ---------- */
+const bubbleLabel = { bubble: '气泡', plain: '纯文本' };
+const hasVibrate = () => typeof navigator.vibrate === 'function';
 function openPrefs() {
-  const st = S.settings;
-  const name = h('input', { type: 'text', placeholder: '我', maxlength: 20 }); name.value = st.userName || '';
-  name.addEventListener('change', async () => { st.userName = name.value.trim(); await saveSettings(); renderUser(); });
-  const enter = h('input', { type: 'checkbox', class: 'switch' }); enter.checked = !!st.enterSend;
-  enter.addEventListener('change', async () => { st.enterSend = enter.checked; await saveSettings(); });
-  const ctx = h('select', {}, [['0', '全部历史'], ['6', '最近 6 条'], ['10', '最近 10 条'], ['20', '最近 20 条'], ['40', '最近 40 条']].map(([v, l]) => h('option', { value: v }, l)));
-  ctx.value = String(st.maxContext || 0);
-  ctx.addEventListener('change', async () => { st.maxContext = Number(ctx.value); await saveSettings(); });
-  const dp = personaSelect(st.defaultPersonaId);
-  dp.addEventListener('change', async () => { st.defaultPersonaId = dp.value || null; await saveSettings(); });
-  openSheet({ title: '偏好设置', onClose: () => { if ((name.value.trim()) !== (st.userName || '')) { st.userName = name.value.trim(); saveSettings(); } renderUser(); }, body: [
-    field('我的名字', name, '显示在侧栏底部与导出的对话中'),
-    h('div', { class: 'switch-row' }, h('div', { class: 'sr-text' }, '回车键发送', h('small', {}, '关闭时回车换行，点按钮发送')), enter),
-    field('默认上下文消息数', ctx), field('新对话默认助手', dp),
+  return openPage({ title: '偏好设置', render: (body) => {
+    const st = S.settings;
+    const persona = S.personas.find((x) => x.id === st.defaultPersonaId);
+    body.append(card(
+      navRow('paint', '主题设置', { value: currentTheme().name, onClick: openThemePage }),
+      navRow('translate', '应用语言', { value: '简体中文', onClick: openLanguageSheet }),
+      navRow('chatdots', '聊天项显示', { onClick: openDisplayPage }),
+      navRow('textfmt', '渲染设置', { onClick: openRenderPage }),
+      navRow('pie', '行为与启动', { onClick: openBehaviorPage }),
+      navRow('image', '图片处理', { soon: true }),
+      navRow('msgsq', '消息样式', { value: bubbleLabel[st.msgStyle] || '气泡', onClick: () => choiceSheet('消息样式', Object.entries(bubbleLabel).map(([k, l]) => ({ label: l, sub: k === 'bubble' ? '用户消息显示在右侧气泡中' : '用户消息与助手消息一样平铺显示', selected: st.msgStyle === k, onPick: () => setSetting('msgStyle', k) }))) }),
+      navRow('refresh', '自动重试', { value: st.retryEnabled ? `${st.retryCount} 次 · ${st.retryDelay}s` : '关闭', onClick: openRetryPage }),
+      navRow('vibrate', '触觉反馈', { value: !hasVibrate() ? '不支持' : st.haptics ? '开启' : '关闭', onClick: openHapticsSheet }),
+      navRow('activity', '后台任务', { soon: true }),
+      navRow('type', '应用字体', { value: st.appFont === 'local' ? (st.appFontName || '本地文件') : APP_FONTS[st.appFont]?.label, onClick: () => openFontSheet('app') }),
+      navRow('code', '代码字体', { value: st.codeFont === 'local' ? (st.codeFontName || '本地文件') : CODE_FONTS[st.codeFont]?.label, onClick: () => openFontSheet('code') }),
+      navRow('fontsize', '聊天字体大小', { value: `${st.chatFontScale}%`, onClick: () => sliderSheet('聊天字体大小', 'chatFontScale', { min: 80, max: 150, step: 5, hint: '只影响聊天消息，不影响界面其他文字。' }) }),
+      navRow('arrowdown', '自动回到底部延迟', { value: st.autoBottomDelay ? `${st.autoBottomDelay}s` : '关闭', onClick: () => sliderSheet('自动回到底部延迟', 'autoBottomDelay', { min: 0, max: 30, step: 1, fmt: (v) => (v ? `${v}s` : '关闭'), hint: '生成回复时如果你向上翻看，停止滚动这么多秒后自动回到底部继续跟随；0 表示不自动回到底部。' }) }),
+      navRow('image', '背景图片', { value: st.bgImage ? '已设置' : '未设置', onClick: openBgSheet }),
+      navRow('image', '背景图片遮罩透明度', { value: `${st.bgMask}%`, onClick: () => sliderSheet('背景图片遮罩透明度', 'bgMask', { hint: '在背景图片上叠加一层背景色，数值越大图片越淡、文字越清楚。' }) }),
+      navRow('rect', '输入框背景透明度', { value: `${st.composerAlpha}%`, onClick: () => sliderSheet('输入框背景透明度', 'composerAlpha', { hint: '100% 为不透明；设置背景图片后调低可以透出图片。' }) }),
+    ));
+    body.append(h('div', { class: 'set-title' }, '输入与对话'), card(
+      navRow('user', '我的名字', { value: (st.userName || '').trim() || '我', onClick: async () => { const t = await askText('我的名字', st.userName || '', { placeholder: '我' }); if (t != null) await setSetting('userName', t.trim().slice(0, 20)); } }),
+      toggleRow('msgsq', '回车键发送', 'enterSend', { sub: '关闭时回车换行，Ctrl/⌘ + 回车发送' }),
+      navRow('layers', '默认上下文消息数', { value: Number(st.maxContext) ? `最近 ${st.maxContext} 条` : '全部历史', onClick: () => choiceSheet('默认上下文消息数', [[0, '全部历史'], [6, '最近 6 条'], [10, '最近 10 条'], [20, '最近 20 条'], [40, '最近 40 条']].map(([v, l]) => ({ label: l, selected: Number(st.maxContext || 0) === v, onPick: () => setSetting('maxContext', v) }))) }),
+      navRow('bot', '新对话默认助手', { value: persona ? persona.name : '无', onClick: () => choiceSheet('新对话默认助手', [{ label: '（无）', selected: !persona, onPick: () => setSetting('defaultPersonaId', null) }, ...S.personas.map((p) => ({ label: p.name, icon: avatarEl(p), selected: persona?.id === p.id, onPick: () => setSetting('defaultPersonaId', p.id) }))]) }),
+    ));
+  } });
+}
+function openLanguageSheet() {
+  choiceSheet('应用语言', [
+    { label: '简体中文', selected: true, onPick: () => {} },
+    { label: '繁體中文', sub: '即将推出', disabled: true },
+    { label: 'English', sub: '即将推出', disabled: true },
+  ]);
+}
+function openHapticsSheet() {
+  const sw = h('input', { type: 'checkbox', class: 'switch', 'aria-label': '触觉反馈' }); sw.checked = !!S.settings.haptics;
+  sw.addEventListener('change', async () => { await setSetting('haptics', sw.checked); haptic(15); });
+  openSheet({ title: '触觉反馈', body: [
+    h('div', { class: 'switch-row' }, h('div', { class: 'sr-text' }, '启用触觉反馈', h('small', {}, '发送消息、回复完成、切换开关时轻微振动')), sw),
+    h('p', { class: 'muted' }, hasVibrate() ? '当前浏览器支持振动接口（navigator.vibrate）。' : '当前浏览器不支持振动接口：iOS Safari / 主屏幕 Web App 均未开放 navigator.vibrate，开启后在 iPhone 上不会有效果；Android Chrome 可用。'),
   ] });
 }
+function openRetryPage() {
+  openPage({ title: '自动重试', render: (body) => {
+    body.append(card(
+      toggleRow('refresh', '网络错误时自动重试', 'retryEnabled', { sub: '网络失败、429 限流或 5xx 服务端错误，且还没收到任何内容时' }),
+      numberRow('listnum', '最多重试次数', 'retryCount', { min: 1, max: 10, unit: '次' }),
+      numberRow('clock', '重试间隔', 'retryDelay', { min: 0, max: 60, unit: '秒' }),
+    ), h('p', { class: 'muted page-note' }, '401/403/400 等请求错误不会重试；点“停止”可随时取消等待中的重试。'));
+  } });
+}
+async function openFontSheet(kind) {
+  const presets = kind === 'app' ? APP_FONTS : CODE_FONTS;
+  const key = kind === 'app' ? 'appFont' : 'codeFont', nameKey = kind === 'app' ? 'appFontName' : 'codeFontName';
+  const rec = await idb.get('kv', `font-${kind}`).catch(() => null);
+  const file = h('input', { type: 'file', accept: '.ttf,.otf,.woff,.woff2,font/*', style: { display: 'none' }, 'aria-label': '选择字体文件' });
+  file.addEventListener('change', async () => {
+    const f = file.files[0]; file.value = ''; if (!f) return;
+    if (f.size > 30 * 1048576) return toast('字体文件过大（>30MB）');
+    // 以 ArrayBuffer 形式保存（部分 WebKit 版本不支持在 IndexedDB 中存 Blob）
+    await idb.putRaw('kv', { name: f.name, type: f.type, data: await f.arrayBuffer() }, `font-${kind}`);
+    if (await loadLocalFont(kind)) { await setSetting(nameKey, f.name.replace(/\.(ttf|otf|woff2?)$/i, ''), { silent: true }); await setSetting(key, 'local'); sh.close(); toast('已应用本地字体'); }
+  });
+  const items = Object.entries(presets).filter(([k]) => k !== 'local').map(([k, v]) => ({ label: v.label, sub: h('span', { style: { fontFamily: v.css } }, kind === 'app' ? '中文 Aa 123 永远年轻' : 'const x = 0x1F; // 0Oo lI1'), selected: S.settings[key] === k, onPick: () => setSetting(key, k) }));
+  if (rec?.data || rec?.blob) items.push({ label: `本地文件：${rec.name}`, selected: S.settings[key] === 'local', onPick: async () => { if (await loadLocalFont(kind)) setSetting(key, 'local'); } });
+  const sh = choiceSheet(kind === 'app' ? '应用字体' : '代码字体', items, { note: '本地字体文件保存在本机 IndexedDB 中，不会上传。支持 ttf / otf / woff / woff2。', footer: h('div', { class: 'input-row', style: { marginTop: '12px' } },
+    h('button', { class: 'btn', style: { flex: 1 }, onclick: () => file.click() }, '上传本地字体'),
+    (rec?.data || rec?.blob) ? h('button', { class: 'btn danger', style: { flex: 1 }, onclick: async () => { await idb.del('kv', `font-${kind}`); if (S.settings[key] === 'local') await setSetting(key, 'system'); sh.close(); toast('已移除本地字体'); } }, '移除本地字体') : null, file) });
+}
+function openBgSheet() {
+  const file = h('input', { type: 'file', accept: 'image/*', style: { display: 'none' }, 'aria-label': '选择背景图片' });
+  file.addEventListener('change', async () => {
+    const f = file.files[0]; file.value = ''; if (!f) return;
+    if (f.size > 20 * 1048576) return toast('图片过大（>20MB）');
+    await idb.putRaw('kv', { name: f.name, type: f.type, data: await f.arrayBuffer() }, 'bg-image'); await setSetting('bgImage', true, { silent: true }); await loadBgImage(); refreshPages(); sh.close(); toast('已设置背景图片');
+  });
+  const sh = openSheet({ title: '背景图片', body: [
+    h('p', { class: 'muted' }, '图片只保存在本机，显示在聊天区域后方。可在“背景图片遮罩透明度”中调整清晰度。'),
+    h('div', { class: 'input-row' },
+      h('button', { class: 'btn', style: { flex: 1 }, onclick: () => file.click() }, S.settings.bgImage ? '更换图片' : '选择图片'),
+      S.settings.bgImage ? h('button', { class: 'btn danger', style: { flex: 1 }, onclick: async () => { await idb.del('kv', 'bg-image'); await setSetting('bgImage', false, { silent: true }); await loadBgImage(); refreshPages(); sh.close(); } }, '移除') : null, file),
+  ] });
+}
+
+/* ---------- 主题设置 ---------- */
+function themeDot(t, extra = '') {
+  const d = h('span', { class: 'theme-dot' + extra }); d.style.setProperty('--dot', t.accent);
+  if (t.bubble) d.style.setProperty('--ring', t.bubble);
+  return d;
+}
+function openThemePage() {
+  openPage({ title: '主题设置', actions: [{ icon: 'tune', label: '颜色模式', onClick: openThemeSheet }], render: (body) => {
+    const st = S.settings;
+    body.append(card(toggleRow('paint', '纯色背景', 'pureBg', { sub: '仅气泡与强调色随主题变化；关闭后背景也会带上主题色调' })));
+    body.append(h('div', { class: 'set-card theme-list', style: { marginTop: '14px' } }, PRESET_THEMES.map((t) => h('button', {
+      class: 'set-row theme-row' + (st.themeId === t.id ? ' on' : ''), 'aria-pressed': String(st.themeId === t.id), 'data-theme-id': t.id, onclick: () => setSetting('themeId', t.id),
+    }, themeDot(t), h('span', { class: 'sr-label' }, t.name), st.themeId === t.id ? icon('check') : null))));
+    const imp = h('input', { type: 'file', accept: 'application/json,.json', style: { display: 'none' }, 'aria-label': '导入主题文件' });
+    imp.addEventListener('change', async () => { const f = imp.files[0]; imp.value = ''; if (f) await importThemes(f); });
+    body.append(h('div', { class: 'set-title with-actions' }, h('span', {}, '自定义主题'), h('span', { class: 'grow' }),
+      h('button', { class: 'icon-btn small', 'aria-label': '新建主题', onclick: () => editTheme(null) }, icon('plus')),
+      h('button', { class: 'icon-btn small', 'aria-label': '导入主题', onclick: () => imp.click() }, icon('download')),
+      h('button', { class: 'icon-btn small', 'aria-label': '导出主题', onclick: exportThemes }, icon('upload')), imp));
+    const cts = st.customThemes || [];
+    body.append(cts.length ? h('div', { class: 'set-card' }, cts.map((t) => h('div', { class: 'set-row theme-row custom' + (st.themeId === t.id ? ' on' : ''), 'data-theme-id': t.id },
+      h('button', { class: 'theme-pick', 'aria-label': `使用主题 ${t.name}`, onclick: () => setSetting('themeId', t.id) }, themeDot(t, ' two'), h('span', { class: 'sr-label' }, t.name)),
+      st.themeId === t.id ? icon('check') : null,
+      h('button', { class: 'icon-btn small', 'aria-label': `复制主题 ${t.name}`, onclick: () => saveTheme({ ...t, id: uid(), name: `${t.name} 副本` }) }, icon('copy')),
+      h('button', { class: 'icon-btn small', 'aria-label': `编辑主题 ${t.name}`, onclick: () => editTheme(t) }, icon('pencil')),
+      h('button', { class: 'icon-btn small danger', 'aria-label': `删除主题 ${t.name}`, onclick: async () => {
+        if (!confirm(`删除主题“${t.name}”？`)) return;
+        S.settings.customThemes = cts.filter((x) => x.id !== t.id);
+        await setSetting('themeId', st.themeId === t.id ? 'default' : st.themeId);
+      } }, icon('trash'))))) : h('p', { class: 'muted page-note' }, '还没有自定义主题。点 ＋ 用取色器创建，或导入 JSON 主题文件。'));
+  } });
+}
+async function saveTheme(t) {
+  const list = [...(S.settings.customThemes || [])];
+  const i = list.findIndex((x) => x.id === t.id);
+  if (i >= 0) list[i] = t; else list.push(t);
+  S.settings.customThemes = list;
+  await setSetting('themeId', t.id);
+}
+function editTheme(t) {
+  const isNew = !t;
+  const d = t ? { ...t } : { id: uid(), name: '', accent: currentTheme().accent, bubble: '' };
+  const name = h('input', { type: 'text', placeholder: '主题名称', maxlength: 20 }); name.value = d.name;
+  const colorPair = (val, label) => {
+    const picker = h('input', { type: 'color', class: 'color-input', 'aria-label': label }); picker.value = validHex(val) ? (val.length === 4 ? '#' + [...val.slice(1)].map((c) => c + c).join('') : val) : '#d97757';
+    const hex = h('input', { type: 'text', class: 'hex-input', 'aria-label': label + '（十六进制）', maxlength: 7, autocapitalize: 'off', spellcheck: false }); hex.value = picker.value;
+    picker.addEventListener('input', () => { hex.value = picker.value; preview(); });
+    hex.addEventListener('input', () => { if (validHex(hex.value)) { picker.value = hex.value.length === 4 ? '#' + [...hex.value.slice(1)].map((c) => c + c).join('') : hex.value; preview(); } });
+    return { picker, hex, row: h('div', { class: 'input-row color-row' }, picker, hex) };
+  };
+  const acc = colorPair(d.accent, '强调色');
+  const useBubble = h('input', { type: 'checkbox', class: 'switch', 'aria-label': '自定义气泡颜色' }); useBubble.checked = validHex(d.bubble);
+  const bub = colorPair(d.bubble || mix(d.accent, '#f1f1ef', 0.12), '气泡颜色');
+  const pv = h('div', { class: 'theme-preview' });
+  const preview = () => {
+    const tmp = { accent: acc.picker.value, bubble: useBubble.checked ? bub.picker.value : '' };
+    const v = themeVars(tmp, document.documentElement.dataset.theme || 'light');
+    pv.innerHTML = '';
+    pv.append(h('div', { class: 'pv-bubble', style: { background: v['--user-bubble'] } }, '你好，这是我的消息'),
+      h('div', { class: 'pv-row' }, h('span', { class: 'pv-switch', style: { background: v['--accent'] } }), h('span', { class: 'pv-send', style: { background: v['--accent'], color: v['--on-accent'] } }, '↑'), h('span', { class: 'pv-link', style: { color: v['--accent'] } }, '链接与高亮')));
+    bub.row.style.display = useBubble.checked ? '' : 'none';
+  };
+  useBubble.addEventListener('change', preview);
+  preview();
+  const sh = openSheet({ title: isNew ? '新建主题' : '编辑主题', back: true, body: [
+    field('名称', name), field('强调色（开关、发送按钮、高亮）', acc.row),
+    h('div', { class: 'switch-row' }, h('div', { class: 'sr-text' }, '自定义气泡颜色', h('small', {}, '关闭时由强调色自动生成')), useBubble), bub.row,
+    h('div', { class: 'field' }, h('label', {}, '预览'), pv),
+  ], footer: [h('button', { class: 'btn', onclick: () => sh.close() }, '取消'), h('button', { class: 'btn primary', onclick: async () => {
+    if (!validHex(acc.picker.value)) return toast('颜色无效');
+    await saveTheme({ id: d.id, name: name.value.trim() || '自定义主题', accent: acc.picker.value, bubble: useBubble.checked ? bub.picker.value : '' });
+    sh.close(); toast('主题已保存');
+  } }, '保存')] });
+}
+function exportThemes() {
+  const themes = S.settings.customThemes || [];
+  if (!themes.length) return toast('没有可导出的自定义主题');
+  const blob = new Blob([JSON.stringify({ app: 'groky-chat', type: 'themes', version: 1, themes }, null, 2)], { type: 'application/json' });
+  const a = h('a', { href: URL.createObjectURL(blob), download: 'groky-chat-themes.json' });
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  toast(`已导出 ${themes.length} 个主题`);
+}
+async function importThemes(f) {
+  let data; try { data = JSON.parse(await f.text()); } catch { return toast('不是有效的 JSON 文件'); }
+  const arr = Array.isArray(data) ? data : Array.isArray(data?.themes) ? data.themes : data?.accent ? [data] : [];
+  const ok = arr.filter((t) => t && validHex(t.accent)).map((t) => ({ id: uid(), name: String(t.name || '导入的主题').slice(0, 20), accent: t.accent, bubble: validHex(t.bubble) ? t.bubble : '' }));
+  if (!ok.length) return toast('文件中没有有效的主题（需要 accent 颜色）');
+  S.settings.customThemes = [...(S.settings.customThemes || []), ...ok];
+  await setSetting('themeId', S.settings.themeId);
+  toast(`已导入 ${ok.length} 个主题`);
+}
+
+/* ---------- 聊天项显示 / 渲染 / 行为 ---------- */
+function openDisplayPage() {
+  openPage({ title: '聊天项显示', render: (body) => body.append(card(
+    toggleRow('user', '显示用户头像', 'showUserAvatar'),
+    toggleRow('chatdots', '显示用户名称', 'showUserName'),
+    toggleRow('clock', '显示用户时间戳', 'showUserTime'),
+    toggleRow('dots', '显示用户消息操作按钮', 'showUserActions'),
+    toggleRow('bot', '聊天标题栏显示助手头像', 'showTitleAvatar'),
+    toggleRow('msgsq', '显示模型名称', 'showModelName'),
+    toggleRow('clock', '显示模型时间戳', 'showModelTime'),
+    toggleRow('globe', '模型名称后显示供应商', 'showProvider'),
+    toggleRow('type', '显示Token和上下文统计', 'showTokenStats', { info: '开启后，OpenAI 兼容接口会额外请求 stream_options.include_usage；服务未返回用量时显示按字数估算的值（标注“估算”）。' }),
+    toggleRow('sparkles', '显示思考卡片', 'showThinking', { info: '关闭后隐藏模型返回的思考过程（reasoning）。' }),
+    toggleRow('wrench', '显示工具卡片', 'x', { soon: true }),
+    toggleRow('file', '显示回复底部文件卡片', 'x', { soon: true }),
+  )) });
+}
+function openRenderPage() {
+  openPage({ title: '渲染设置', render: (body) => body.append(card(
+    toggleRow('hash', '启用 $...$ 渲染', 'dollarMath', { info: '把单个美元符号包裹的内容当作行内公式；关闭后只识别 $$…$$、\\(…\\)、\\[…\\]。' }),
+    toggleRow('code', '启用数学公式渲染', 'mathRender', { info: '使用本地打包的 KaTeX 渲染 LaTeX 公式（离线可用）。' }),
+    toggleRow('type', '用户消息 Markdown 渲染', 'userMarkdown'),
+    toggleRow('brain', '思维链 Markdown 渲染', 'reasoningMarkdown'),
+    toggleRow('msgsq', '助手消息 Markdown 渲染', 'assistantMarkdown'),
+    toggleRow('collapse', '自动折叠代码块', 'codeCollapse'),
+    numberRow('listnum', '超过多少行自动折叠', 'codeCollapseLines', { min: 1, max: 500, unit: '行' }),
+    toggleRow('wrap', '移动端代码块自动换行', 'mobileCodeWrap'),
+  )) });
+}
+const NAV_LABEL = { scroll: '滚动时显示', always: '始终显示', off: '关闭' };
+function openBehaviorPage() {
+  openPage({ title: '行为与启动', render: (body) => body.append(card(
+    toggleRow('brain', '自动折叠思考', 'autoCollapseThinking', { info: '思考结束、开始输出正文后自动收起思考过程。' }),
+    toggleRow('collapse', '折叠过长消息', 'collapseLong', { info: '超过约 1200 字或 24 行的消息默认折叠，可点“展开全文”。' }),
+    toggleRow('refresh', '重新生成时删除下面的消息', 'regenDeleteBelow', { info: '关闭后，重新生成中间某条回复只替换这一条，下面的对话保留。' }),
+    toggleRow('alert', '重新生成前弹出确认', 'confirmRegen'),
+    toggleRow('sun', '生成时保持屏幕常亮', 'keepAwake', { info: 'wakeLock' in navigator ? '使用 Screen Wake Lock API。iOS 需 16.4+（主屏幕 Web App 需 iOS 18.4+）。' : '当前浏览器不支持 Screen Wake Lock API（iOS 需 16.4+，主屏幕 Web App 需 18.4+），开启后不会生效。' }),
+    navRow('chevright', '消息导航按钮', { value: NAV_LABEL[S.settings.msgNav] || '滚动时显示', onClick: () => choiceSheet('消息导航按钮', Object.entries(NAV_LABEL).map(([k, l]) => ({ label: l, selected: S.settings.msgNav === k, onPick: () => setSetting('msgNav', k) }))) }),
+    toggleRow('calendar', '显示对话列表日期', 'showListDates'),
+    toggleRow('sidebar', '点选助手时不自动关闭侧边栏', 'keepDrawerOnAssistant'),
+    toggleRow('file', '显示工具结果摘要', 'x', { soon: true }),
+    toggleRow('imageoff', '隐藏工具结果中的图片', 'x', { soon: true }),
+    toggleRow('branch', '创建分支时保留消息版本', 'x', { soon: true }),
+  )) });
+}
+
+/* ---------- 助手设置 ---------- */
+function openAssistantsPage() {
+  const pg = openPage({ title: '助手设置', actions: [{ icon: 'plus', label: '新建助手', onClick: () => editPersona({ id: null, name: '', emoji: '🙂', prompt: '', temperature: null }, () => pg.refresh()) }], render: (body) => {
+    if (!S.personas.length) body.append(h('p', { class: 'muted page-note' }, '还没有助手，点右上角 ＋ 新建。'));
+    body.append(h('div', { class: 'asst-cards' }, S.personas.map((p) => h('button', { class: 'asst-card', 'data-id': p.id, onclick: () => editPersona(p, () => pg.refresh()) },
+      avatarEl(p, 'asst-avatar big'),
+      h('span', { class: 'ac-main' }, h('span', { class: 'ac-name' }, `${p.emoji && p.emoji.trim() ? p.emoji + ' ' : ''}${p.name}`),
+        h('span', { class: 'ac-sub' }, (p.prompt || '').trim().split('\n')[0] || '暂无提示词')),
+      S.settings.defaultPersonaId === p.id ? h('span', { class: 'li-badge' }, '默认') : null))));
+  } });
+  return pg;
+}
+
 function openDefaultModel() {
   const st = S.settings;
   const dm = modelSelect(st.defaultModel);
@@ -1282,6 +1903,9 @@ function bindEvents() {
   $('#tool-ctx').addEventListener('click', openCtxPicker);
   $('#tool-more').addEventListener('click', openMoreMenu);
   $('#tool-mic').addEventListener('click', toggleMic);
+  $('#messages').addEventListener('scroll', onMessagesScroll, { passive: true });
+  $('#nav-up').addEventListener('click', () => navMsg(-1));
+  $('#nav-down').addEventListener('click', () => navMsg(1));
   if (!(window.SpeechRecognition || window.webkitSpeechRecognition)) $('#tool-mic').classList.add('unavailable');
   const input = $('#input');
   input.addEventListener('input', autoGrow);
@@ -1355,7 +1979,11 @@ async function init() {
     toast('无法打开本地数据库：' + e.message, 5000);
   }
   if (window.hljs) hljs.configure({ ignoreUnescapedHTML: true });
-  applyTheme(); bindEvents(); renderAll();
+  applyTheme(); applyPrefs(); bindEvents(); renderAll();
+  // 本地字体 / 背景图片（Blob 存在 IndexedDB）
+  if (S.settings.appFont === 'local') loadLocalFont('app');
+  if (S.settings.codeFont === 'local') loadLocalFont('code');
+  if (S.settings.bgImage) loadBgImage();
   document.documentElement.classList.add('ready');
 }
 

@@ -127,7 +127,7 @@ ok('Anthropic SSE 解析（含必要请求头）', at.includes('Anthropic 格式
 await page.locator('#btn-menu').click();
 await page.waitForTimeout(300);
 await page.locator('.asst-add').click();
-await page.getByPlaceholder('角色名称').fill('猫娘');
+await page.getByPlaceholder('助手名称').fill('猫娘');
 await page.locator('.sheet').last().locator('textarea').fill('你是一只可爱的猫娘，句尾带“喵”。');
 await sheetBtn('保存').click();
 ok('新建助手（抽屉）', await page.evaluate(() => window.__groky.S.personas.some((p) => p.name === '猫娘')) && (await page.locator('.asst-item', { hasText: '猫娘' }).count()) === 1);

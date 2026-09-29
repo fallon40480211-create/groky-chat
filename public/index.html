@@ -43,6 +43,7 @@
     <main id="main">
       <header id="topbar">
         <button id="btn-menu" class="icon-btn" aria-label="菜单" data-icon="menu"></button>
+        <span id="title-avatar" hidden></span>
         <button id="btn-conv-settings" class="title-btn" aria-label="对话设置">
           <span id="conv-title">新对话</span>
           <span id="conv-model">未选择模型</span>
@@ -50,7 +51,12 @@
         <button id="btn-tune" class="icon-btn" aria-label="对话参数" data-icon="tune"></button>
         <button id="btn-new" class="icon-btn" aria-label="新对话" data-icon="chatplus"></button>
       </header>
+      <div id="chat-bg" aria-hidden="true"></div>
       <section id="messages" aria-live="polite"></section>
+      <div id="msg-nav" hidden>
+        <button id="nav-up" class="nav-btn" aria-label="上一条消息" data-icon="arrowup"></button>
+        <button id="nav-down" class="nav-btn" aria-label="下一条消息" data-icon="arrowdown"></button>
+      </div>
       <footer id="composer">
         <div class="composer-card">
           <textarea id="input" rows="1" placeholder="输入消息与AI聊天" enterkeyhint="send" aria-label="消息"></textarea>
